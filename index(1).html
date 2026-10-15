@@ -1,0 +1,2959 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+    <title>Warden-6 Command</title>
+    <meta name="claude:viewport-fit-sides" content="cover">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600&family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&family=Stardos+Stencil:wght@700&display=swap">
+    <style>
+        /* Layout concept: a tactical command console. Fixed side rail + top AppBar on desktop,
+   bottom tab bar on phones. Chamfered steel panels over a generated camouflage field. */
+        
+         :root {
+            --bg: #10140c;
+            --bg2: #171c10;
+            --panel: #1e2515;
+            --panel2: #283219;
+            --line: #46562f;
+            --fg: #eceedd;
+            --mut: #aab392;
+            --accent: #d4bf63;
+            --accent-ink: #1b1a08;
+            --accent2: #86a954;
+            --ok: #93d25e;
+            --warn: #f2b73c;
+            --crit: #ec6048;
+            --info: #6fb7d8;
+            --camo1: #171d0f;
+            --camo2: #202915;
+            --camo3: #2a341a;
+            --camo4: #121708;
+            --f-display: 'Stardos Stencil', 'Impact', 'Arial Narrow', sans-serif;
+            --f-ui: 'Barlow Condensed', 'Arial Narrow', 'Helvetica Neue', sans-serif;
+            --f-body: 'Barlow', 'Helvetica Neue', Arial, sans-serif;
+            --f-mono: 'IBM Plex Mono', 'Courier New', monospace;
+            --cut: 12px;
+            --scale: 1;
+            color-scheme: dark;
+        }
+        
+         :root[data-skin="desert"] {
+            --bg: #1a140d;
+            --bg2: #231a11;
+            --panel: #2b2116;
+            --panel2: #37291a;
+            --line: #64502f;
+            --fg: #f3ead8;
+            --mut: #c0ad8a;
+            --accent: #e0a93e;
+            --accent-ink: #1d1405;
+            --accent2: #c58b4e;
+            --camo1: #241a10;
+            --camo2: #33261a;
+            --camo3: #443221;
+            --camo4: #1b130b;
+        }
+        
+         :root[data-skin="night"] {
+            --bg: #020d05;
+            --bg2: #04170a;
+            --panel: #06200d;
+            --panel2: #0a2d14;
+            --line: #146a2d;
+            --fg: #c4ffd3;
+            --mut: #6fc88a;
+            --accent: #3dff7a;
+            --accent-ink: #02210c;
+            --accent2: #22b45a;
+            --ok: #5dff94;
+            --warn: #d6ff4a;
+            --crit: #ff6a5a;
+            --info: #5ae0c8;
+            --camo1: #031208;
+            --camo2: #05200d;
+            --camo3: #082b13;
+            --camo4: #020a04;
+        }
+        
+         :root[data-skin="naval"] {
+            --bg: #08121c;
+            --bg2: #0d1c2b;
+            --panel: #112437;
+            --panel2: #17304a;
+            --line: #33597c;
+            --fg: #e3eef8;
+            --mut: #93b0c9;
+            --accent: #63b8ec;
+            --accent-ink: #04141f;
+            --accent2: #4f86b5;
+            --camo1: #0b1824;
+            --camo2: #102234;
+            --camo3: #16304a;
+            --camo4: #071019;
+        }
+        
+        * {
+            box-sizing: border-box
+        }
+        
+        html {
+            font-size: calc(16px*var(--scale))
+        }
+        
+        body {
+            margin: 0;
+            background: var(--bg);
+            color: var(--fg);
+            font: 400 1rem/1.5 var(--f-body);
+            padding-block: 0;
+            padding-left: max(16px, env(safe-area-inset-left, 0px));
+            padding-right: max(16px, env(safe-area-inset-right, 0px));
+            min-height: 100vh;
+            -webkit-text-size-adjust: 100%;
+        }
+        
+        button,
+        input,
+        select,
+        textarea {
+            font: inherit;
+            color: inherit
+        }
+        
+        h1,
+        h2,
+        h3,
+        h4,
+        p {
+            margin: 0
+        }
+        
+        h1,
+        h2,
+        h3 {
+            text-wrap: balance
+        }
+        
+         :focus-visible {
+            outline: 3px solid var(--accent);
+            outline-offset: 2px
+        }
+        
+         ::selection {
+            background: var(--accent);
+            color: var(--accent-ink)
+        }
+        
+        .ic {
+            width: 1.25em;
+            height: 1.25em;
+            fill: none;
+            stroke: currentColor;
+            stroke-width: 1.8;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            flex: none;
+            vertical-align: -.2em
+        }
+        
+        .ic.lg {
+            width: 2.2em;
+            height: 2.2em
+        }
+        
+        .ic.xl {
+            width: 3.4em;
+            height: 3.4em
+        }
+        
+        .sr {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            overflow: hidden;
+            clip: rect(0 0 0 0);
+            white-space: nowrap
+        }
+        /* ---------- backgrounds ---------- */
+        
+        .bg-camo,
+        .bg-topo,
+        .bg-vig {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 0
+        }
+        
+        .bg-camo {
+            background-image: var(--camo-img, none);
+            background-size: 520px 520px;
+            opacity: .9
+        }
+        
+        .bg-topo {
+            opacity: .16;
+            background: repeating-radial-gradient(circle at 18% 22%, transparent 0 22px, var(--accent2) 22px 23px), repeating-radial-gradient(circle at 82% 78%, transparent 0 30px, var(--accent2) 30px 31px)
+        }
+        
+        .bg-vig {
+            background: radial-gradient(ellipse at 50% 30%, transparent 30%, var(--bg) 100%), repeating-linear-gradient(0deg, rgba(0, 0, 0, .18) 0 1px, transparent 1px 3px)
+        }
+        
+        .ticker,
+        .app,
+        #modal,
+        #toasts {
+            position: relative;
+            z-index: 2
+        }
+        /* ---------- classification ticker ---------- */
+        
+        .ticker {
+            margin-inline: calc(-1*max(16px, env(safe-area-inset-left, 0px)));
+            overflow: hidden;
+            white-space: nowrap;
+            background: var(--accent);
+            color: var(--accent-ink);
+            font: 700 .8rem/1 var(--f-ui);
+            letter-spacing: .18em;
+            text-transform: uppercase;
+            padding: 7px 0;
+            border-bottom: 3px solid var(--accent-ink)
+        }
+        
+        .ticker-track {
+            display: inline-flex;
+            gap: 3rem;
+            padding-left: 100%;
+            animation: tick 38s linear infinite
+        }
+        
+        .ticker-track span {
+            display: inline-flex;
+            align-items: center;
+            gap: .6rem
+        }
+        
+        @keyframes tick {
+            to {
+                transform: translateX(-100%)
+            }
+        }
+        
+        .calm .ticker-track,
+        .calm .pulse,
+        .calm .blink {
+            animation: none
+        }
+        
+        @media (prefers-reduced-motion:reduce) {
+            .ticker-track,
+            .pulse,
+            .blink {
+                animation: none!important
+            }
+        }
+        /* ---------- shell ---------- */
+        
+        .app {
+            display: grid;
+            grid-template-columns: 232px minmax(0, 1fr);
+            grid-template-rows: auto 1fr;
+            gap: 16px;
+            padding-block: 16px 28px;
+            max-width: 1500px;
+            margin: 0 auto
+        }
+        
+        .appbar {
+            grid-column: 1/-1;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            flex-wrap: wrap;
+            padding: 10px 14px;
+            background: linear-gradient(180deg, var(--panel2), var(--panel));
+            border: 2px solid var(--line);
+            border-top-color: var(--accent);
+            position: sticky;
+            top: env(safe-area-inset-top, 0px);
+            z-index: 20;
+            clip-path: polygon(var(--cut) 0, 100% 0, 100% calc(100% - var(--cut)), calc(100% - var(--cut)) 100%, 0 100%, 0 var(--cut))
+        }
+        
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            min-width: 0
+        }
+        
+        .mark {
+            width: 46px;
+            height: 46px;
+            display: grid;
+            place-items: center;
+            background: var(--accent);
+            color: var(--accent-ink);
+            clip-path: polygon(50% 0, 100% 18%, 100% 62%, 50% 100%, 0 62%, 0 18%)
+        }
+        
+        .mark .ic {
+            width: 26px;
+            height: 26px;
+            stroke-width: 2.2
+        }
+        
+        .brand-name {
+            font: 700 1.5rem/1 var(--f-display);
+            letter-spacing: .06em;
+            color: var(--accent)
+        }
+        
+        .brand-sub {
+            font: 600 .78rem/1.1 var(--f-ui);
+            letter-spacing: .2em;
+            color: var(--mut);
+            text-transform: uppercase
+        }
+        
+        .screen-title {
+            font: 700 1.15rem/1.1 var(--f-ui);
+            letter-spacing: .12em;
+            text-transform: uppercase;
+            padding-left: 14px;
+            border-left: 3px solid var(--accent2);
+            margin: 0
+        }
+        
+        .bar-right {
+            margin-left: auto;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap
+        }
+        
+        .dtg .zs {
+            margin-left: 6px;
+            opacity: .75
+        }
+        
+        .dtg {
+            font: 500 .9rem var(--f-mono);
+            color: var(--accent);
+            background: rgba(0, 0, 0, .35);
+            border: 1px solid var(--line);
+            padding: 6px 10px;
+            white-space: nowrap
+        }
+        
+        .chip-op {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            border: 1px solid var(--line);
+            background: rgba(0, 0, 0, .3);
+            padding: 5px 12px 5px 8px;
+            cursor: pointer;
+            min-height: 44px;
+            font: 600 .95rem var(--f-ui);
+            letter-spacing: .08em;
+            text-transform: uppercase
+        }
+        
+        .chip-op:hover {
+            border-color: var(--accent)
+        }
+        
+        .rc-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            min-height: 44px;
+            padding: 0 12px;
+            border: 2px solid var(--rc, var(--ok));
+            color: var(--rc, var(--ok));
+            background: rgba(0, 0, 0, .3);
+            cursor: pointer;
+            font: 700 .95rem var(--f-ui);
+            letter-spacing: .12em;
+            text-transform: uppercase
+        }
+        
+        .pulse {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: var(--rc, var(--ok));
+            animation: pulse 1.8s ease-in-out infinite
+        }
+        
+        @keyframes pulse {
+            50% {
+                box-shadow: 0 0 0 7px transparent;
+                opacity: .5
+            }
+            0%,
+            100% {
+                box-shadow: 0 0 0 0 var(--rc, var(--ok))
+            }
+        }
+        
+        .app[data-rc="5"] {
+            --rc: var(--ok)
+        }
+        
+        .app[data-rc="4"] {
+            --rc: var(--info)
+        }
+        
+        .app[data-rc="3"] {
+            --rc: var(--warn)
+        }
+        
+        .app[data-rc="2"] {
+            --rc: #ff8a3c
+        }
+        
+        .app[data-rc="1"] {
+            --rc: var(--crit)
+        }
+        
+        .side {
+            position: sticky;
+            top: calc(88px + env(safe-area-inset-top, 0px));
+            align-self: start;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            background: linear-gradient(180deg, var(--panel), var(--bg2));
+            border: 2px solid var(--line);
+            padding: 10px;
+            clip-path: polygon(var(--cut) 0, 100% 0, 100% 100%, 0 100%, 0 var(--cut))
+        }
+        
+        .side h2 {
+            font: 700 .75rem var(--f-ui);
+            letter-spacing: .24em;
+            color: var(--mut);
+            text-transform: uppercase;
+            padding: 4px 8px 8px;
+            border-bottom: 1px dashed var(--line);
+            margin-bottom: 4px
+        }
+        
+        .nav {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            width: 100%;
+            min-height: 46px;
+            padding: 0 12px;
+            background: transparent;
+            border: 1px solid transparent;
+            color: var(--fg);
+            cursor: pointer;
+            text-align: left;
+            font: 600 1.05rem var(--f-ui);
+            letter-spacing: .1em;
+            text-transform: uppercase;
+            position: relative
+        }
+        
+        .nav:hover {
+            background: rgba(255, 255, 255, .05);
+            border-color: var(--line)
+        }
+        
+        .nav[aria-current="page"] {
+            background: var(--accent);
+            color: var(--accent-ink);
+            border-color: var(--accent)
+        }
+        
+        .nav .n-count {
+            margin-left: auto;
+            font: 500 .78rem var(--f-mono);
+            background: rgba(0, 0, 0, .35);
+            color: var(--fg);
+            padding: 1px 7px;
+            min-width: 24px;
+            text-align: center
+        }
+        
+        .nav[aria-current="page"] .n-count {
+            background: var(--accent-ink);
+            color: var(--accent)
+        }
+        
+        .side-foot {
+            margin-top: 8px;
+            padding: 10px 8px 4px;
+            border-top: 1px dashed var(--line);
+            font: 500 .75rem/1.5 var(--f-mono);
+            color: var(--mut)
+        }
+        
+        main {
+            min-width: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 16px
+        }
+        
+        .screen {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            min-width: 0
+        }
+        
+        .grid {
+            display: grid;
+            gap: 16px;
+            min-width: 0
+        }
+        
+        .g2 {
+            grid-template-columns: repeat(2, minmax(0, 1fr))
+        }
+        
+        .g3 {
+            grid-template-columns: repeat(3, minmax(0, 1fr))
+        }
+        
+        .g4 {
+            grid-template-columns: repeat(4, minmax(0, 1fr))
+        }
+        
+        .g-auto {
+            grid-template-columns: repeat(auto-fill, minmax(min(100%, 280px), 1fr))
+        }
+        
+        .g-main {
+            grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr)
+        }
+        /* ---------- panels ---------- */
+        
+        .panel {
+            position: relative;
+            background: linear-gradient(160deg, color-mix(in srgb, var(--panel2) 96%, transparent), color-mix(in srgb, var(--panel) 96%, transparent));
+            border: 2px solid var(--line);
+            padding: 16px;
+            min-width: 0;
+            clip-path: polygon(var(--cut) 0, 100% 0, 100% calc(100% - var(--cut)), calc(100% - var(--cut)) 100%, 0 100%, 0 var(--cut))
+        }
+        
+        .panel::before,
+        .panel::after {
+            content: "";
+            position: absolute;
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: radial-gradient(circle at 35% 30%, var(--mut), #222 75%);
+            opacity: .8
+        }
+        
+        .panel::before {
+            top: 6px;
+            right: 8px
+        }
+        
+        .panel::after {
+            bottom: 6px;
+            left: 8px
+        }
+        
+        .ph {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 12px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid var(--line)
+        }
+        
+        .ph h2,
+        .ph h3 {
+            font: 700 1.2rem/1.1 var(--f-ui);
+            letter-spacing: .12em;
+            text-transform: uppercase
+        }
+        
+        .ph .ic {
+            color: var(--accent)
+        }
+        
+        .ph .grow {
+            margin-left: auto;
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            align-items: center
+        }
+        
+        .hazard {
+            height: 12px;
+            background: repeating-linear-gradient(-45deg, var(--accent) 0 14px, var(--accent-ink) 14px 28px);
+            border: 1px solid var(--accent-ink)
+        }
+        
+        .muted {
+            color: var(--mut)
+        }
+        
+        .mono {
+            font-family: var(--f-mono)
+        }
+        
+        .tiny {
+            font-size: .82rem
+        }
+        /* ---------- hero ---------- */
+        
+        .hero {
+            overflow: hidden;
+            padding: 26px 24px 22px;
+            display: grid;
+            gap: 14px
+        }
+        
+        .hero .wm {
+            position: absolute;
+            right: -30px;
+            top: -30px;
+            width: 260px;
+            height: 260px;
+            opacity: .08;
+            color: var(--accent);
+            stroke-width: 1
+        }
+        
+        .hero h2 {
+            font: 700 clamp(2.2rem, 6vw, 4rem)/.95 var(--f-display);
+            letter-spacing: .04em;
+            color: var(--fg);
+            text-shadow: 3px 3px 0 rgba(0, 0, 0, .45)
+        }
+        
+        .hero h2 span {
+            color: var(--accent)
+        }
+        
+        .hero p {
+            max-width: 62ch;
+            color: var(--mut);
+            font-size: 1.05rem
+        }
+        
+        .btn-row {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap
+        }
+        
+        .stamp {
+            position: absolute;
+            right: 26px;
+            top: 70px;
+            font: 700 1.2rem var(--f-display);
+            letter-spacing: .14em;
+            color: var(--crit);
+            border: 3px solid var(--crit);
+            padding: 2px 12px;
+            transform: rotate(-8deg);
+            opacity: .55;
+            pointer-events: none
+        }
+        /* ---------- buttons ---------- */
+        
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            min-height: 44px;
+            padding: 0 18px;
+            cursor: pointer;
+            background: transparent;
+            border: 2px solid var(--accent);
+            color: var(--accent);
+            font: 700 1rem var(--f-ui);
+            letter-spacing: .14em;
+            text-transform: uppercase;
+            clip-path: polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px);
+            transition: transform .08s, background .15s, color .15s
+        }
+        
+        .btn:hover {
+            background: color-mix(in srgb, var(--accent) 18%, transparent)
+        }
+        
+        .btn:active {
+            transform: translateY(2px)
+        }
+        
+        .btn.solid {
+            background: var(--accent);
+            color: var(--accent-ink)
+        }
+        
+        .btn.solid:hover {
+            filter: brightness(1.1);
+            background: var(--accent)
+        }
+        
+        .btn.ok {
+            border-color: var(--ok);
+            color: var(--ok)
+        }
+        
+        .btn.ok:hover {
+            background: color-mix(in srgb, var(--ok) 18%, transparent)
+        }
+        
+        .btn.danger {
+            border-color: var(--crit);
+            color: var(--crit)
+        }
+        
+        .btn.danger:hover {
+            background: color-mix(in srgb, var(--crit) 20%, transparent)
+        }
+        
+        .btn.danger.solid {
+            background: var(--crit);
+            color: #1a0602
+        }
+        
+        .btn.ghost {
+            border-color: var(--line);
+            color: var(--fg)
+        }
+        
+        .btn.ghost:hover {
+            border-color: var(--accent);
+            color: var(--accent)
+        }
+        
+        .btn.sm {
+            min-height: 38px;
+            padding: 0 12px;
+            font-size: .9rem
+        }
+        
+        .btn[disabled] {
+            opacity: .45;
+            cursor: not-allowed
+        }
+        
+        .ibtn {
+            width: 44px;
+            height: 44px;
+            display: inline-grid;
+            place-items: center;
+            cursor: pointer;
+            background: rgba(0, 0, 0, .3);
+            border: 1px solid var(--line);
+            color: var(--fg)
+        }
+        
+        .ibtn:hover {
+            border-color: var(--accent);
+            color: var(--accent)
+        }
+        
+        .ibtn.danger:hover {
+            border-color: var(--crit);
+            color: var(--crit)
+        }
+        
+        .ibtn.sm {
+            width: 38px;
+            height: 38px
+        }
+        
+        .chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            min-height: 38px;
+            padding: 0 14px;
+            cursor: pointer;
+            background: rgba(0, 0, 0, .28);
+            border: 1px solid var(--line);
+            color: var(--fg);
+            font: 600 .92rem var(--f-ui);
+            letter-spacing: .1em;
+            text-transform: uppercase
+        }
+        
+        .chip:hover {
+            border-color: var(--accent)
+        }
+        
+        .chip[aria-pressed="true"] {
+            background: var(--accent);
+            color: var(--accent-ink);
+            border-color: var(--accent)
+        }
+        
+        .chips {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap
+        }
+        /* ---------- forms ---------- */
+        
+        .field {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            min-width: 0
+        }
+        
+        .field label,
+        .lbl {
+            font: 600 .85rem var(--f-ui);
+            letter-spacing: .16em;
+            text-transform: uppercase;
+            color: var(--mut)
+        }
+        
+        .in {
+            width: 100%;
+            min-height: 44px;
+            padding: 8px 12px;
+            background: rgba(0, 0, 0, .4);
+            border: 2px solid var(--line);
+            border-radius: 0;
+            color: var(--fg)
+        }
+        
+        .in::placeholder {
+            color: color-mix(in srgb, var(--mut) 70%, transparent)
+        }
+        
+        .in:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 28%, transparent)
+        }
+        
+        .in[aria-invalid="true"] {
+            border-color: var(--crit)
+        }
+        
+        textarea.in {
+            min-height: 84px;
+            resize: vertical
+        }
+        
+        select.in {
+            appearance: none;
+            background-image: linear-gradient(45deg, transparent 50%, var(--accent) 50%), linear-gradient(135deg, var(--accent) 50%, transparent 50%);
+            background-position: calc(100% - 18px) 55%, calc(100% - 12px) 55%;
+            background-size: 6px 6px;
+            background-repeat: no-repeat;
+            padding-right: 34px
+        }
+        
+        .err {
+            min-height: 1.1em;
+            color: var(--crit);
+            font: 500 .82rem var(--f-mono)
+        }
+        
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 12px
+        }
+        
+        .form-grid .full {
+            grid-column: 1/-1
+        }
+        
+        input[type=range] {
+            width: 100%;
+            accent-color: var(--accent);
+            min-height: 30px
+        }
+        
+        .searchbox {
+            position: relative;
+            flex: 1 1 220px;
+            min-width: 0
+        }
+        
+        .searchbox .ic {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--mut)
+        }
+        
+        .searchbox .in {
+            padding-left: 40px
+        }
+        
+        .toolbar {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            align-items: center
+        }
+        
+        .toolbar .in {
+            width: auto;
+            min-width: 150px
+        }
+        /* ---------- badges + progress ---------- */
+        
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 2px 9px;
+            font: 700 .78rem/1.5 var(--f-ui);
+            letter-spacing: .14em;
+            text-transform: uppercase;
+            border: 1px solid currentColor;
+            white-space: nowrap
+        }
+        
+        .b-planned {
+            color: var(--info)
+        }
+        
+        .b-active {
+            color: var(--warn)
+        }
+        
+        .b-complete {
+            color: var(--ok)
+        }
+        
+        .b-aborted {
+            color: var(--crit)
+        }
+        
+        .b-low {
+            color: var(--mut)
+        }
+        
+        .b-medium {
+            color: var(--info)
+        }
+        
+        .b-high {
+            color: var(--warn)
+        }
+        
+        .b-critical {
+            color: var(--crit)
+        }
+        
+        .b-ready {
+            color: var(--ok)
+        }
+        
+        .b-deployed {
+            color: var(--warn)
+        }
+        
+        .b-leave {
+            color: var(--info)
+        }
+        
+        .bar {
+            height: 12px;
+            background: rgba(0, 0, 0, .5);
+            border: 1px solid var(--line);
+            position: relative;
+            overflow: hidden
+        }
+        
+        .bar i {
+            display: block;
+            height: 100%;
+            background: repeating-linear-gradient(-45deg, var(--accent2) 0 8px, color-mix(in srgb, var(--accent2) 70%, #000) 8px 16px);
+            transition: width .4s
+        }
+        
+        .bar.warn i {
+            background: repeating-linear-gradient(-45deg, var(--warn) 0 8px, color-mix(in srgb, var(--warn) 70%, #000) 8px 16px)
+        }
+        
+        .bar.crit i {
+            background: repeating-linear-gradient(-45deg, var(--crit) 0 8px, color-mix(in srgb, var(--crit) 70%, #000) 8px 16px)
+        }
+        /* ---------- stat tiles ---------- */
+        
+        .stat {
+            display: flex;
+            align-items: center;
+            gap: 14px
+        }
+        
+        .stat .ic {
+            width: 2.4em;
+            height: 2.4em;
+            color: var(--accent);
+            padding: 8px;
+            border: 2px solid var(--line);
+            background: rgba(0, 0, 0, .3);
+            box-sizing: content-box
+        }
+        
+        .stat b {
+            display: block;
+            font: 700 2.2rem/1 var(--f-display);
+            font-variant-numeric: tabular-nums
+        }
+        
+        .stat span {
+            font: 600 .85rem var(--f-ui);
+            letter-spacing: .16em;
+            text-transform: uppercase;
+            color: var(--mut)
+        }
+        /* ---------- readiness ---------- */
+        
+        .rc-grid {
+            display: grid;
+            grid-template-columns: repeat(5, minmax(0, 1fr));
+            gap: 8px
+        }
+        
+        .rc-btn {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 2px;
+            padding: 10px 4px;
+            min-height: 74px;
+            cursor: pointer;
+            background: rgba(0, 0, 0, .35);
+            border: 2px solid var(--c);
+            color: var(--c);
+            font: 700 .75rem var(--f-ui);
+            letter-spacing: .1em;
+            text-transform: uppercase
+        }
+        
+        .rc-btn b {
+            font: 700 1.8rem/1 var(--f-display)
+        }
+        
+        .rc-btn:hover {
+            background: color-mix(in srgb, var(--c) 18%, transparent)
+        }
+        
+        .rc-btn[aria-pressed="true"] {
+            background: var(--c);
+            color: #10140c
+        }
+        
+        .rc-btn[data-rc="5"] {
+            --c: var(--ok)
+        }
+        
+        .rc-btn[data-rc="4"] {
+            --c: var(--info)
+        }
+        
+        .rc-btn[data-rc="3"] {
+            --c: var(--warn)
+        }
+        
+        .rc-btn[data-rc="2"] {
+            --c: #ff8a3c
+        }
+        
+        .rc-btn[data-rc="1"] {
+            --c: var(--crit)
+        }
+        /* ---------- radar ---------- */
+        
+        .radar-wrap {
+            display: grid;
+            place-items: center;
+            aspect-ratio: 1;
+            max-width: 100%;
+            width: 100%
+        }
+        
+        #radar {
+            width: 100%;
+            height: 100%;
+            display: block;
+            border: 2px solid var(--line);
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(0, 0, 0, .2), rgba(0, 0, 0, .6))
+        }
+        /* ---------- lists ---------- */
+        
+        .list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            min-width: 0
+        }
+        
+        .card {
+            position: relative;
+            display: grid;
+            gap: 10px;
+            padding: 14px 14px 14px 18px;
+            background: rgba(0, 0, 0, .28);
+            border: 1px solid var(--line);
+            border-left: 6px solid var(--sev, var(--line));
+            min-width: 0
+        }
+        
+        .card:hover {
+            border-color: var(--accent);
+            border-left-color: var(--sev, var(--accent))
+        }
+        
+        .card.pri-low {
+            --sev: var(--mut)
+        }
+        
+        .card.pri-medium {
+            --sev: var(--info)
+        }
+        
+        .card.pri-high {
+            --sev: var(--warn)
+        }
+        
+        .card.pri-critical {
+            --sev: var(--crit)
+        }
+        
+        .card-top {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            flex-wrap: wrap
+        }
+        
+        .card-title {
+            font: 700 1.4rem/1.1 var(--f-ui);
+            letter-spacing: .08em;
+            text-transform: uppercase;
+            overflow-wrap: anywhere
+        }
+        
+        .card-meta {
+            display: flex;
+            gap: 6px 16px;
+            flex-wrap: wrap;
+            color: var(--mut);
+            font: 500 .85rem var(--f-mono)
+        }
+        
+        .card-meta span {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px
+        }
+        
+        .card-actions {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            align-items: center
+        }
+        
+        .card-actions .push {
+            margin-left: auto;
+            display: flex;
+            gap: 8px
+        }
+        
+        .sp {
+            flex: 1
+        }
+        
+        .empty,
+        .state {
+            display: grid;
+            justify-items: center;
+            text-align: center;
+            gap: 10px;
+            padding: 34px 16px;
+            border: 2px dashed var(--line);
+            background: rgba(0, 0, 0, .2)
+        }
+        
+        .empty .ic,
+        .state .ic {
+            width: 3rem;
+            height: 3rem;
+            color: var(--accent)
+        }
+        
+        .empty h3,
+        .state h3 {
+            font: 700 1.3rem var(--f-ui);
+            letter-spacing: .12em;
+            text-transform: uppercase
+        }
+        
+        .empty p,
+        .state p {
+            max-width: 48ch;
+            color: var(--mut)
+        }
+        
+        .state.error {
+            border-color: var(--crit)
+        }
+        
+        .state.error .ic {
+            color: var(--crit)
+        }
+        
+        .spinner {
+            width: 42px;
+            height: 42px;
+            border: 5px solid var(--line);
+            border-top-color: var(--accent);
+            border-radius: 50%;
+            animation: spin .9s linear infinite
+        }
+        
+        @keyframes spin {
+            to {
+                transform: rotate(360deg)
+            }
+        }
+        
+        @media (prefers-reduced-motion:reduce) {
+            .spinner {
+                animation-duration: 3s
+            }
+        }
+        
+        .skel {
+            height: 92px;
+            background: linear-gradient(90deg, rgba(255, 255, 255, .04), rgba(255, 255, 255, .11), rgba(255, 255, 255, .04));
+            background-size: 200% 100%;
+            animation: sh 1.2s linear infinite;
+            border: 1px solid var(--line)
+        }
+        
+        @keyframes sh {
+            to {
+                background-position: -200% 0
+            }
+        }
+        
+        .log {
+            display: flex;
+            flex-direction: column;
+            max-height: 300px;
+            overflow: auto;
+            font: 400 .85rem/1.45 var(--f-mono)
+        }
+        
+        .log li {
+            list-style: none;
+            display: flex;
+            gap: 10px;
+            padding: 7px 4px;
+            border-bottom: 1px dotted var(--line)
+        }
+        
+        .log time {
+            color: var(--accent);
+            flex: none
+        }
+        
+        .log .t-warn {
+            color: var(--warn)
+        }
+        
+        .log .t-crit {
+            color: var(--crit)
+        }
+        
+        .log .t-ok {
+            color: var(--ok)
+        }
+        
+        ul.log {
+            margin: 0;
+            padding: 0
+        }
+        /* ---------- intel cards ---------- */
+        
+        .flag {
+            font-size: 2.6rem;
+            line-height: 1
+        }
+        
+        .kv {
+            display: grid;
+            grid-template-columns: auto 1fr;
+            gap: 2px 12px;
+            font: 500 .85rem var(--f-mono)
+        }
+        
+        .kv dt {
+            color: var(--mut)
+        }
+        
+        .kv dd {
+            margin: 0;
+            text-align: right;
+            font-variant-numeric: tabular-nums
+        }
+        
+        .src {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font: 500 .8rem var(--f-mono);
+            padding: 3px 10px;
+            border: 1px solid currentColor
+        }
+        
+        .src.live {
+            color: var(--ok)
+        }
+        
+        .src.cache {
+            color: var(--warn)
+        }
+        /* ---------- roster ---------- */
+        
+        .rank {
+            display: grid;
+            place-items: center;
+            width: 54px;
+            height: 54px;
+            background: var(--accent);
+            color: var(--accent-ink);
+            clip-path: polygon(50% 0, 100% 18%, 100% 62%, 50% 100%, 0 62%, 0 18%)
+        }
+        
+        .rank svg {
+            width: 30px;
+            height: 30px;
+            stroke: currentColor;
+            fill: none;
+            stroke-width: 2.6;
+            stroke-linecap: round;
+            stroke-linejoin: round
+        }
+        
+        .person {
+            display: grid;
+            grid-template-columns: auto 1fr;
+            gap: 12px;
+            align-items: start
+        }
+        
+        .person h3 {
+            font: 700 1.25rem/1.15 var(--f-ui);
+            letter-spacing: .06em;
+            text-transform: uppercase;
+            overflow-wrap: anywhere
+        }
+        /* ---------- gear table ---------- */
+        
+        .tablewrap {
+            overflow-x: auto;
+            border: 1px solid var(--line)
+        }
+        
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            min-width: 640px
+        }
+        
+        th,
+        td {
+            padding: 10px 12px;
+            text-align: left;
+            border-bottom: 1px solid var(--line);
+            vertical-align: middle
+        }
+        
+        th {
+            font: 700 .8rem var(--f-ui);
+            letter-spacing: .16em;
+            text-transform: uppercase;
+            color: var(--mut);
+            background: rgba(0, 0, 0, .3)
+        }
+        
+        td {
+            font: 500 .95rem var(--f-body)
+        }
+        
+        td.num,
+        th.num {
+            text-align: center;
+            font-family: var(--f-mono);
+            font-variant-numeric: tabular-nums
+        }
+        
+        tr:hover td {
+            background: rgba(255, 255, 255, .03)
+        }
+        
+        .stepper {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px
+        }
+        
+        .stepper output {
+            min-width: 2.6ch;
+            text-align: center;
+            font: 500 1rem var(--f-mono)
+        }
+        /* ---------- terminal ---------- */
+        
+        .term {
+            background: #020602;
+            border: 2px solid var(--line);
+            color: #b6f5b6;
+            font: 400 .92rem/1.55 var(--f-mono);
+            display: flex;
+            flex-direction: column;
+            min-height: 380px;
+            max-height: 56vh
+        }
+        
+         :root[data-skin="desert"] .term {
+            color: #f4dcae
+        }
+        
+         :root[data-skin="naval"] .term {
+            color: #bfe3fb
+        }
+        
+         :root[data-skin="night"] .term {
+            color: #6bff9a
+        }
+        
+        .term-out {
+            flex: 1;
+            overflow: auto;
+            padding: 12px 14px;
+            white-space: pre-wrap;
+            overflow-wrap: anywhere
+        }
+        
+        .term-out .cmd {
+            color: var(--accent)
+        }
+        
+        .term-out .ok {
+            color: var(--ok)
+        }
+        
+        .term-out .bad {
+            color: var(--crit)
+        }
+        
+        .term-out .dim {
+            opacity: .7
+        }
+        
+        .term-in {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            border-top: 1px solid var(--line);
+            padding: 6px 12px
+        }
+        
+        .term-in label {
+            color: var(--accent);
+            white-space: nowrap
+        }
+        
+        .term-in input {
+            flex: 1;
+            min-width: 0;
+            background: transparent;
+            border: 0;
+            outline: 0;
+            color: inherit;
+            min-height: 42px;
+            font: inherit
+        }
+        
+        .term-in:focus-within {
+            box-shadow: inset 0 0 0 2px var(--accent)
+        }
+        
+        .blink {
+            animation: blink 1s steps(2) infinite
+        }
+        
+        @keyframes blink {
+            50% {
+                opacity: 0
+            }
+        }
+        /* ---------- manual ---------- */
+        
+        .prose p+p {
+            margin-top: .7em
+        }
+        
+        .prose {
+            max-width: 70ch
+        }
+        
+        .pill-n {
+            display: grid;
+            place-items: center;
+            width: 34px;
+            height: 34px;
+            background: var(--accent);
+            color: var(--accent-ink);
+            font: 700 1.1rem var(--f-display);
+            clip-path: polygon(50% 0, 100% 25%, 100% 75%, 50% 100%, 0 75%, 0 25%)
+        }
+        
+        .check {
+            display: flex;
+            gap: 12px;
+            align-items: flex-start;
+            padding: 10px 4px;
+            border-bottom: 1px dotted var(--line);
+            cursor: pointer
+        }
+        
+        .check input {
+            width: 22px;
+            height: 22px;
+            accent-color: var(--accent);
+            flex: none;
+            margin-top: 2px
+        }
+        
+        .check span {
+            min-width: 0
+        }
+        
+        .check input:checked+span {
+            text-decoration: line-through;
+            color: var(--mut)
+        }
+        
+        .feat {
+            display: grid;
+            gap: 8px;
+            padding: 14px;
+            border: 1px solid var(--line);
+            background: rgba(0, 0, 0, .25)
+        }
+        
+        .feat .ic {
+            width: 2rem;
+            height: 2rem;
+            color: var(--accent)
+        }
+        
+        .feat h4 {
+            font: 700 1.1rem var(--f-ui);
+            letter-spacing: .1em;
+            text-transform: uppercase
+        }
+        
+        .feat p {
+            color: var(--mut);
+            font-size: .95rem
+        }
+        
+        .ok-ic {
+            color: var(--ok)
+        }
+        /* ---------- modal + toast ---------- */
+        
+        #modal {
+            position: fixed;
+            inset: 0;
+            display: grid;
+            place-items: center;
+            padding: 16px;
+            background: rgba(2, 5, 1, .78);
+            backdrop-filter: blur(3px);
+            z-index: 100;
+            overflow: auto
+        }
+        
+        .mcard {
+            width: min(640px, 100%);
+            max-height: calc(100vh - 32px);
+            overflow: auto;
+            background: var(--panel);
+            border: 2px solid var(--accent);
+            padding: 0;
+            clip-path: polygon(var(--cut) 0, 100% 0, 100% calc(100% - var(--cut)), calc(100% - var(--cut)) 100%, 0 100%, 0 var(--cut));
+            animation: pop .18s ease-out
+        }
+        
+        @keyframes pop {
+            from {
+                transform: translateY(12px) scale(.98);
+                opacity: 0
+            }
+        }
+        
+        .mhead {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 14px 16px;
+            background: var(--accent);
+            color: var(--accent-ink)
+        }
+        
+        .mhead h2 {
+            font: 700 1.2rem var(--f-ui);
+            letter-spacing: .14em;
+            text-transform: uppercase
+        }
+        
+        .mhead .ibtn {
+            margin-left: auto;
+            background: transparent;
+            border-color: var(--accent-ink);
+            color: var(--accent-ink)
+        }
+        
+        .mhead .ibtn:hover {
+            background: var(--accent-ink);
+            color: var(--accent)
+        }
+        
+        .mbody {
+            padding: 18px 16px;
+            display: grid;
+            gap: 14px
+        }
+        
+        .mfoot {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+            flex-wrap: wrap;
+            padding-top: 4px
+        }
+        
+        .mcard.danger {
+            border-color: var(--crit)
+        }
+        
+        .mcard.danger .mhead {
+            background: var(--crit);
+            color: #1a0602
+        }
+        
+        .mcard.danger .mhead .ibtn {
+            border-color: #1a0602;
+            color: #1a0602
+        }
+        
+        .skins {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 10px
+        }
+        
+        .skin {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px;
+            min-height: 56px;
+            cursor: pointer;
+            background: rgba(0, 0, 0, .3);
+            border: 2px solid var(--line);
+            font: 700 1rem var(--f-ui);
+            letter-spacing: .1em;
+            text-transform: uppercase;
+            text-align: left
+        }
+        
+        .skin i {
+            width: 34px;
+            height: 34px;
+            flex: none;
+            border: 2px solid rgba(255, 255, 255, .3);
+            background: linear-gradient(135deg, var(--a) 50%, var(--b) 50%)
+        }
+        
+        .skin[aria-pressed="true"] {
+            border-color: var(--accent);
+            background: color-mix(in srgb, var(--accent) 16%, transparent)
+        }
+        
+        #toasts {
+            position: fixed;
+            right: max(16px, env(safe-area-inset-right, 0px));
+            bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            z-index: 200;
+            max-width: min(380px, calc(100vw - 32px))
+        }
+        
+        .toast {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 12px;
+            background: var(--panel2);
+            border: 2px solid var(--line);
+            border-left: 6px solid var(--accent);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, .5);
+            animation: pop .2s ease-out;
+            font: 600 1rem var(--f-ui);
+            letter-spacing: .04em
+        }
+        
+        .toast.ok {
+            border-left-color: var(--ok)
+        }
+        
+        .toast.bad {
+            border-left-color: var(--crit)
+        }
+        
+        .toast.warn {
+            border-left-color: var(--warn)
+        }
+        
+        .toast .btn {
+            margin-left: auto
+        }
+        /* ---------- responsive ---------- */
+        
+        @media (max-width:1100px) {
+            .g4 {
+                grid-template-columns: repeat(2, minmax(0, 1fr))
+            }
+            .g-main {
+                grid-template-columns: minmax(0, 1fr)
+            }
+            .g3 {
+                grid-template-columns: repeat(2, minmax(0, 1fr))
+            }
+        }
+        
+        @media (max-width:860px) {
+            .app {
+                grid-template-columns: minmax(0, 1fr);
+                padding-bottom: 96px
+            }
+            .side {
+                position: fixed;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                top: auto;
+                flex-direction: row;
+                gap: 2px;
+                padding: 6px max(6px, env(safe-area-inset-right, 0px)) calc(6px + env(safe-area-inset-bottom, 0px)) max(6px, env(safe-area-inset-left, 0px));
+                z-index: 50;
+                clip-path: none;
+                border-width: 2px 0 0;
+                border-top-color: var(--accent);
+                background: var(--panel)
+            }
+            .side h2,
+            .side-foot {
+                display: none
+            }
+            .nav {
+                flex-direction: column;
+                justify-content: center;
+                gap: 2px;
+                padding: 4px 0;
+                min-height: 54px;
+                font-size: .66rem;
+                letter-spacing: .04em;
+                text-align: center;
+                flex: 1 1 0;
+                min-width: 0
+            }
+            .nav .n-count {
+                display: none
+            }
+            .nav .ic {
+                width: 1.45rem;
+                height: 1.45rem
+            }
+            .nav span.lab {
+                overflow: hidden;
+                text-overflow: ellipsis;
+                max-width: 100%
+            }
+            .appbar {
+                padding: 8px 10px;
+                gap: 8px
+            }
+            .screen-title {
+                display: none
+            }
+            .dtg {
+                font-size: .78rem
+            }
+            #toasts {
+                bottom: calc(80px + env(safe-area-inset-bottom, 0px))
+            }
+        }
+        
+        @media (max-width:600px) {
+            .g2,
+            .g3,
+            .g4,
+            .form-grid,
+            .skins {
+                grid-template-columns: minmax(0, 1fr)
+            }
+            .g4.keep2 {
+                grid-template-columns: repeat(2, minmax(0, 1fr))
+            }
+            .hero {
+                padding: 20px 16px
+            }
+            .stamp {
+                display: none
+            }
+            .brand-sub,
+            .dtg .zs {
+                display: none
+            }
+            .brand-name {
+                font-size: 1.3rem
+            }
+            .rank {
+                width: 46px;
+                height: 46px
+            }
+            .chip-op span.who {
+                display: none
+            }
+            .chip-op {
+                padding: 5px 8px
+            }
+            .rc-badge .rc-lab {
+                display: none
+            }
+            .stat b {
+                font-size: 1.8rem
+            }
+        }
+    </style>
+
+    <style>
+         :root {
+            color-scheme: dark
+        }
+        
+        img {
+            max-width: 100%
+        }
+        
+        [hidden] {
+            display: none!important
+        }
+    </style>
+</head>
+
+<body>
+    <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+<defs>
+<symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/></symbol>
+<symbol id="i-star" viewBox="0 0 24 24"><path d="M12 2.5l2.9 6.2 6.6.8-4.9 4.6 1.3 6.6L12 17.4l-5.9 3.3 1.3-6.6L2.5 9.5l6.6-.8z"/></symbol>
+<symbol id="i-radar" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r=".8"/><path d="M12 12l6.5-6.5"/></symbol>
+<symbol id="i-crosshair" viewBox="0 0 24 24"><circle cx="12" cy="12" r="7"/><path d="M12 2v6M12 16v6M2 12h6M16 12h6"/></symbol>
+<symbol id="i-map" viewBox="0 0 24 24"><path d="M3 6l6-2 6 2 6-2v14l-6 2-6-2-6 2z"/><path d="M9 4v14M15 6v14"/></symbol>
+<symbol id="i-pin" viewBox="0 0 24 24"><path d="M12 21s-7-6.2-7-11.5a7 7 0 0114 0C19 14.800 12 21 12 21z"/><circle cx="12" cy="9.500" r="2.500"/></symbol>
+<symbol id="i-users" viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.200"/><path d="M3 20c0-3.500 2.800-6 6-6s6 2.500 6 6"/><circle cx="17" cy="9" r="2.500"/><path d="M17 14c2.500 0 4.500 2 4.500 5"/></symbol>
+<symbol id="i-box" viewBox="0 0 24 24"><path d="M3 7l9-4 9 4v10l-9 4-9-4z"/><path d="M3 7l9 4 9-4M12 11v10"/></symbol>
+<symbol id="i-terminal" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="1.500"/><path d="M7 9l3 3-3 3M12 16h5"/></symbol>
+<symbol id="i-book" viewBox="0 0 24 24"><path d="M4 4h7a2 2 0 012 2v14a2 2 0 00-2-2H4z"/><path d="M20 4h-7a2 2 0 00-2 2v14a2 2 0 012-2h7z"/></symbol>
+<symbol id="i-home" viewBox="0 0 24 24"><rect x="3" y="3" width="7.500" height="7.500"/><rect x="13.500" y="3" width="7.500" height="7.500"/><rect x="3" y="13.500" width="7.500" height="7.500"/><rect x="13.500" y="13.500" width="7.500" height="7.500"/></symbol>
+<symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+<symbol id="i-minus" viewBox="0 0 24 24"><path d="M5 12h14"/></symbol>
+<symbol id="i-trash" viewBox="0 0 24 24"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13M10 11v6M14 11v6"/></symbol>
+<symbol id="i-edit" viewBox="0 0 24 24"><path d="M4 20l1-5L16 4l4 4L9 19z"/><path d="M14 6l4 4"/></symbol>
+<symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.500"/><path d="M16 16l5 5"/></symbol>
+<symbol id="i-check" viewBox="0 0 24 24"><path d="M4 12.500l5 5L20 6.500"/></symbol>
+<symbol id="i-alert" viewBox="0 0 24 24"><path d="M12 3l10 18H2z"/><path d="M12 10v5M12 18v.5"/></symbol>
+<symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.500 2"/></symbol>
+<symbol id="i-cloud" viewBox="0 0 24 24"><path d="M7 18a4.500 4.500 0 01-.5-9A6 6 0 0118 10.500 3.800 3.800 0 0117.500 18z"/></symbol>
+<symbol id="i-globe" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c3 3 3 15 0 18M12 3c-3 3-3 15 0 18"/></symbol>
+<symbol id="i-lock" viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="10" rx="1"/><path d="M8 11V8a4 4 0 018 0v3"/></symbol>
+<symbol id="i-power" viewBox="0 0 24 24"><path d="M12 3v9M6.500 6.500a8 8 0 1011 0"/></symbol>
+<symbol id="i-flag" viewBox="0 0 24 24"><path d="M5 21V4M5 4h12l-2 4 2 4H5"/></symbol>
+<symbol id="i-medal" viewBox="0 0 24 24"><circle cx="12" cy="15" r="5.500"/><path d="M8.500 10.500L6 3h4l2 4 2-4h4l-2.500 7.500"/></symbol>
+<symbol id="i-x" viewBox="0 0 24 24"><path d="M5 5l14 14M19 5L5 19"/></symbol>
+<symbol id="i-refresh" viewBox="0 0 24 24"><path d="M20 12a8 8 0 01-14 5.300M4 12a8 8 0 0114-5.300"/><path d="M18 3v4h-4M6 21v-4h4"/></symbol>
+<symbol id="i-sliders" viewBox="0 0 24 24"><path d="M4 7h10M18 7h2M4 17h2M10 17h10"/><circle cx="16" cy="7" r="2"/><circle cx="8" cy="17" r="2"/></symbol>
+<symbol id="i-send" viewBox="0 0 24 24"><path d="M3 11l18-8-8 18-2-8z"/></symbol>
+<symbol id="i-eye" viewBox="0 0 24 24"><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></symbol>
+<symbol id="i-bolt" viewBox="0 0 24 24"><path d="M13 2L5 14h6l-1 8 8-12h-6z"/></symbol>
+<symbol id="i-target" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.200"/></symbol>
+<symbol id="i-play" viewBox="0 0 24 24"><path d="M7 4l13 8-13 8z"/></symbol>
+<symbol id="i-undo" viewBox="0 0 24 24"><path d="M9 7L4 12l5 5M4 12h10a6 6 0 010 8"/></symbol>
+<symbol id="i-wifi-off" viewBox="0 0 24 24"><path d="M2 8.500a15 15 0 0120 0M5.500 12a10 10 0 0113 0M9 15.500a5 5 0 016 0M3 3l18 18M12 19.500v.5"/></symbol>
+<symbol id="i-medkit" viewBox="0 0 24 24"><rect x="3" y="7" width="18" height="13" rx="1"/><path d="M9 7V4h6v3M12 10.500v6M9 13.500h6"/></symbol>
+<symbol id="i-fuel" viewBox="0 0 24 24"><path d="M5 21V4h9v17M5 21h9M14 9h3l2 2v7a1.500 1.500 0 01-3 0v-4h-2M7 8h5"/></symbol>
+<symbol id="i-radio" viewBox="0 0 24 24"><rect x="3" y="9" width="18" height="12" rx="1.500"/><path d="M7 9l10-5M7 14h5M7 17h5"/><circle cx="17" cy="15" r="2"/></symbol>
+<symbol id="i-jeep" viewBox="0 0 24 24"><path d="M2 15v-4l3-1 2-4h8l2 4h4v5z"/><circle cx="7" cy="16.500" r="2.200"/><circle cx="17" cy="16.500" r="2.200"/></symbol>
+<symbol id="i-helmet" viewBox="0 0 24 24"><path d="M3 15a9 9 0 0118 0z"/><path d="M2 15h20M2 18h20"/></symbol>
+<symbol id="i-down" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></symbol>
+<symbol id="i-tag" viewBox="0 0 24 24"><path d="M3 12V4h8l10 10-8 8z"/><circle cx="7.500" cy="8.500" r="1.200"/></symbol>
+</defs>
+</svg>
+
+    <div class="bg-camo" aria-hidden="true"></div>
+    <div class="bg-topo" aria-hidden="true"></div>
+    <div class="bg-vig" aria-hidden="true"></div>
+
+    <div class="ticker" aria-hidden="true">
+        <div class="ticker-track" id="ticker"></div>
+    </div>
+
+    <div class="app" id="app" data-rc="4">
+        <header class="appbar">
+            <div class="brand">
+                <div class="mark"><svg class="ic"><use href="#i-star"/></svg></div>
+                <div>
+                    <div class="brand-name">WARDEN-6</div>
+                    <div class="brand-sub">Field Command Net</div>
+                </div>
+            </div>
+            <h1 class="screen-title" id="screenTitle">Command Dashboard</h1>
+            <div class="bar-right">
+                <div class="dtg" id="dtg" title="Date-time group, Zulu">--</div>
+                <button class="rc-badge" data-act="go" data-to="dash" title="Readiness condition. Open dashboard to change it."><span class="pulse"></span><span class="rc-lab">Readiness</span><b id="rcBadge">4</b></button>
+                <button class="chip-op" data-act="signin" title="Operator sign-in"><svg class="ic"><use href="#i-helmet"/></svg><span class="who" id="whoName">CPL DEMO-1</span></button>
+                <button class="ibtn" data-act="settings" aria-label="Settings and display"><svg class="ic"><use href="#i-sliders"/></svg></button>
+            </div>
+        </header>
+
+        <nav class="side" aria-label="Main">
+            <h2>Sections</h2>
+            <button class="nav" data-act="go" data-to="dash"><svg class="ic"><use href="#i-home"/></svg><span class="lab">HQ</span></button>
+            <button class="nav" data-act="go" data-to="missions"><svg class="ic"><use href="#i-target"/></svg><span class="lab">Missions</span><span class="n-count" id="nMissions">0</span></button>
+            <button class="nav" data-act="go" data-to="intel"><svg class="ic"><use href="#i-globe"/></svg><span class="lab">Intel</span></button>
+            <button class="nav" data-act="go" data-to="roster"><svg class="ic"><use href="#i-users"/></svg><span class="lab">Roster</span><span class="n-count" id="nRoster">0</span></button>
+            <button class="nav" data-act="go" data-to="gear"><svg class="ic"><use href="#i-box"/></svg><span class="lab">Armory</span><span class="n-count" id="nGear">0</span></button>
+            <button class="nav" data-act="go" data-to="comms"><svg class="ic"><use href="#i-terminal"/></svg><span class="lab">Comms</span></button>
+            <button class="nav" data-act="go" data-to="manual"><svg class="ic"><use href="#i-book"/></svg><span class="lab">Manual</span></button>
+            <div class="side-foot">UNIT: 6TH SIGNAL DET.<br>NET: WARDEN-6<br>BUILD: CC302-FINAL</div>
+        </nav>
+
+        <main id="main">
+
+            <!-- ========== DASHBOARD ========== -->
+            <section class="screen" id="s-dash" hidden aria-labelledby="h-dash">
+                <div class="panel hero">
+                    <svg class="ic wm"><use href="#i-shield"/></svg>
+                    <div class="hazard" aria-hidden="true"></div>
+                    <h2 id="h-dash">WARDEN-6<br><span>FIELD COMMAND</span></h2>
+                    <p>One console to plan missions, read allied intel, manage your roster and track armory stock. Everything you change is saved on this device.</p>
+                    <div class="btn-row">
+                        <button class="btn solid" data-act="mission-new"><svg class="ic"><use href="#i-plus"/></svg>New mission</button>
+                        <button class="btn" data-act="go" data-to="intel"><svg class="ic"><use href="#i-globe"/></svg>Open intel</button>
+                        <button class="btn ghost" data-act="go" data-to="comms"><svg class="ic"><use href="#i-terminal"/></svg>Open comms</button>
+                        <button class="btn ghost" data-act="go" data-to="manual"><svg class="ic"><use href="#i-book"/></svg>Field manual</button>
+                    </div>
+                    <div class="stamp" aria-hidden="true">TRAINING USE</div>
+                </div>
+
+                <div class="grid g4 keep2" id="stats"></div>
+
+                <div class="grid g-main">
+                    <div class="grid" style="gap:16px;align-content:start">
+                        <div class="panel">
+                            <div class="ph"><svg class="ic"><use href="#i-flag"/></svg>
+                                <h3>Readiness condition</h3>
+                                <div class="grow"><span class="muted tiny" id="rcText"></span></div>
+                            </div>
+                            <div class="rc-grid" id="rcGrid"></div>
+                        </div>
+                        <div class="panel">
+                            <div class="ph"><svg class="ic"><use href="#i-target"/></svg>
+                                <h3>Mission progress</h3>
+                                <div class="grow"><button class="btn sm ghost" data-act="go" data-to="missions">View all</button></div>
+                            </div>
+                            <div class="list" id="dashMissions"></div>
+                        </div>
+                        <div class="panel">
+                            <div class="ph"><svg class="ic"><use href="#i-clock"/></svg>
+                                <h3>Activity log</h3>
+                                <div class="grow"><button class="btn sm ghost" data-act="log-clear"><svg class="ic"><use href="#i-trash"/></svg>Clear log</button></div>
+                            </div>
+                            <ul class="log" id="logList"></ul>
+                        </div>
+                    </div>
+                    <div class="grid" style="gap:16px;align-content:start">
+                        <div class="panel">
+                            <div class="ph"><svg class="ic"><use href="#i-radar"/></svg>
+                                <h3>Radar scope</h3>
+                            </div>
+                            <div class="radar-wrap"><canvas id="radar" width="400" height="400" aria-label="Animated radar showing mission positions"></canvas></div>
+                            <p class="muted tiny" style="margin-top:10px">Each blip is a mission. Distance from center shows priority: critical sits closest.</p>
+                        </div>
+                        <div class="panel">
+                            <div class="ph"><svg class="ic"><use href="#i-cloud"/></svg>
+                                <h3>Field weather</h3>
+                            </div>
+                            <div class="field" style="margin-bottom:12px"><label for="wxSite">Site</label>
+                                <select class="in" id="wxSite"></select></div>
+                            <div id="wxBody"></div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ========== MISSIONS ========== -->
+            <section class="screen" id="s-missions" hidden aria-labelledby="h-missions">
+                <div class="panel">
+                    <div class="ph"><svg class="ic"><use href="#i-target"/></svg>
+                        <h2 id="h-missions">Mission board</h2>
+                        <div class="grow"><button class="btn solid" data-act="mission-new"><svg class="ic"><use href="#i-plus"/></svg>New mission</button></div>
+                    </div>
+                    <div class="toolbar">
+                        <div class="searchbox"><svg class="ic"><use href="#i-search"/></svg><label class="sr" for="mSearch">Search missions</label><input class="in" id="mSearch" type="search" placeholder="Search codename, objective, location" autocomplete="off"></div>
+                        <label class="sr" for="mPri">Priority</label>
+                        <select class="in" id="mPri"><option value="all">All priorities</option><option value="critical">Critical</option><option value="high">High</option><option value="medium">Medium</option><option value="low">Low</option></select>
+                        <label class="sr" for="mSort">Sort</label>
+                        <select class="in" id="mSort"><option value="new">Newest first</option><option value="pri">Highest priority</option><option value="prog">Most progress</option><option value="name">Codename A to Z</option></select>
+                    </div>
+                    <div class="chips" id="mChips" role="group" aria-label="Filter by status" style="margin-top:12px"></div>
+                </div>
+                <div class="list" id="mList" aria-live="polite"></div>
+            </section>
+
+            <!-- ========== INTEL (API) ========== -->
+            <section class="screen" id="s-intel" hidden aria-labelledby="h-intel">
+                <div class="panel">
+                    <div class="ph"><svg class="ic"><use href="#i-globe"/></svg>
+                        <h2 id="h-intel">Allied intel</h2>
+                        <div class="grow"><span id="intelSrc"></span><button class="btn sm" data-act="intel-reload"><svg class="ic"><use href="#i-refresh"/></svg>Refresh</button></div>
+                    </div>
+                    <p class="muted" style="margin-bottom:12px">Country records pulled live from the public REST Countries API. Choose a region, search, brief a record, or dismiss it from your list.</p>
+                    <div class="chips" id="iRegions" role="group" aria-label="Region"></div>
+                    <div class="toolbar" style="margin-top:12px">
+                        <div class="searchbox"><svg class="ic"><use href="#i-search"/></svg><label class="sr" for="iSearch">Search intel</label><input class="in" id="iSearch" type="search" placeholder="Search country, capital, subregion" autocomplete="off"></div>
+                        <label class="sr" for="iSort">Sort</label>
+                        <select class="in" id="iSort"><option value="name">Name A to Z</option><option value="pop">Largest population</option><option value="area">Largest area</option></select>
+                        <button class="btn sm ghost" data-act="intel-restore" id="iRestore"><svg class="ic"><use href="#i-undo"/></svg>Restore dismissed</button>
+                    </div>
+                </div>
+                <div id="iBody" aria-live="polite"></div>
+            </section>
+
+            <!-- ========== ROSTER ========== -->
+            <section class="screen" id="s-roster" hidden aria-labelledby="h-roster">
+                <div class="panel">
+                    <div class="ph"><svg class="ic"><use href="#i-users"/></svg>
+                        <h2 id="h-roster">Personnel roster</h2>
+                        <div class="grow"><button class="btn solid" data-act="person-new"><svg class="ic"><use href="#i-plus"/></svg>Add soldier</button></div>
+                    </div>
+                    <div class="toolbar">
+                        <div class="searchbox"><svg class="ic"><use href="#i-search"/></svg><label class="sr" for="rSearch">Search roster</label><input class="in" id="rSearch" type="search" placeholder="Search name, specialty" autocomplete="off"></div>
+                    </div>
+                    <div class="chips" id="rChips" role="group" aria-label="Filter by unit" style="margin-top:12px"></div>
+                </div>
+                <div class="grid g-auto" id="rList" aria-live="polite"></div>
+            </section>
+
+            <!-- ========== ARMORY ========== -->
+            <section class="screen" id="s-gear" hidden aria-labelledby="h-gear">
+                <div class="grid g3 keep2" id="gearStats"></div>
+                <div class="panel">
+                    <div class="ph"><svg class="ic"><use href="#i-box"/></svg>
+                        <h2 id="h-gear">Armory and supply</h2>
+                    </div>
+                    <form id="gearForm" class="form-grid" style="grid-template-columns:repeat(auto-fit,minmax(150px,1fr));align-items:start" novalidate>
+                        <div class="field"><label for="g-name">Item</label><input class="in" id="g-name" maxlength="40" placeholder="e.g. Field radio" autocomplete="off">
+                            <div class="err" id="e-g-name"></div>
+                        </div>
+                        <div class="field"><label for="g-cat">Category</label><select class="in" id="g-cat"><option>Weapons</option><option>Comms</option><option>Medical</option><option>Vehicles</option><option>Rations</option><option>Fuel</option></select></div>
+                        <div class="field"><label for="g-qty">Quantity</label><input class="in" id="g-qty" type="number" min="0" max="9999" value="10">
+                            <div class="err" id="e-g-qty"></div>
+                        </div>
+                        <div class="field"><label for="g-min">Reorder at</label><input class="in" id="g-min" type="number" min="0" max="9999" value="4">
+                            <div class="err" id="e-g-min"></div>
+                        </div>
+                        <div class="field"><span class="lbl" aria-hidden="true">&nbsp;</span><button class="btn solid" type="submit" style="min-height:44px"><svg class="ic"><use href="#i-plus"/></svg>Add item</button></div>
+                    </form>
+                </div>
+                <div class="panel">
+                    <div class="toolbar" style="margin-bottom:12px">
+                        <div class="searchbox"><svg class="ic"><use href="#i-search"/></svg><label class="sr" for="gSearch">Search armory</label><input class="in" id="gSearch" type="search" placeholder="Search items" autocomplete="off"></div>
+                        <div class="chips" id="gChips" role="group" aria-label="Filter by status"></div>
+                    </div>
+                    <div class="tablewrap" id="gTable" tabindex="0" aria-label="Armory table, scrolls sideways on small screens"></div>
+                </div>
+            </section>
+
+            <!-- ========== COMMS ========== -->
+            <section class="screen" id="s-comms" hidden aria-labelledby="h-comms">
+                <div class="panel">
+                    <div class="ph"><svg class="ic"><use href="#i-radio"/></svg>
+                        <h2 id="h-comms">Secure comms terminal</h2>
+                        <div class="grow"><button class="btn sm ghost" data-cmd="clear"><svg class="ic"><use href="#i-trash"/></svg>Clear screen</button></div>
+                    </div>
+                    <div class="chips" id="cmdChips" style="margin-bottom:12px" aria-label="Quick commands"></div>
+                    <div class="term" id="term">
+                        <div class="term-out" id="termOut" role="log" aria-live="polite"></div>
+                        <form class="term-in" id="termForm" autocomplete="off">
+                            <label for="termIn" id="termPrompt">demo@warden6:~$</label>
+                            <input id="termIn" type="text" spellcheck="false" autocapitalize="off" autocomplete="off" aria-label="Type a command and press Enter">
+                            <button class="btn sm solid" type="submit"><svg class="ic"><use href="#i-send"/></svg>Send</button>
+                        </form>
+                    </div>
+                    <p class="muted tiny" style="margin-top:10px">Tip: press the Up and Down arrow keys to reuse earlier commands. Type <b class="mono">help</b> for the full list.</p>
+                </div>
+            </section>
+
+            <!-- ========== MANUAL ========== -->
+            <section class="screen" id="s-manual" hidden aria-labelledby="h-manual">
+                <div class="panel">
+                    <div class="hazard" aria-hidden="true" style="margin-bottom:14px"></div>
+                    <div class="ph"><svg class="ic"><use href="#i-book"/></svg>
+                        <h2 id="h-manual">Field manual</h2>
+                    </div>
+                    <div class="prose">
+                        <p><b>Warden-6</b> is a field command console for small units. It helps a unit leader plan missions, read intelligence about allied nations, keep a personnel roster and watch supply levels, all in one place.</p>
+                        <p><b>Intended users:</b> team leaders, operations clerks and logistics staff who need quick, readable status on a phone or a laptop.</p>
+                        <p><b>Problem it solves:</b> unit information is usually scattered across notes and radio calls. Warden-6 keeps it in one list-based interface with clear warnings and safe deletes.</p>
+                    </div>
+                </div>
+                <div class="grid g3" id="featGrid"></div>
+                <div class="panel">
+                    <div class="ph"><svg class="ic"><use href="#i-check"/></svg>
+                        <h3>CC 302 requirement map</h3>
+                    </div>
+                    <p class="muted tiny" style="margin-bottom:10px">This site is the web edition of the project. The right column shows where each required concept lives here.</p>
+                    <div class="tablewrap" tabindex="0" aria-label="Requirement map table">
+                        <table id="reqTable"></table>
+                    </div>
+                </div>
+                <div class="grid g2">
+                    <div class="panel">
+                        <div class="ph"><svg class="ic"><use href="#i-eye"/></svg>
+                            <h3>HCI principles applied</h3>
+                        </div>
+                        <div class="list" id="hciList"></div>
+                    </div>
+                    <div class="panel">
+                        <div class="ph"><svg class="ic"><use href="#i-flag"/></svg>
+                            <h3>Presentation checklist</h3>
+                            <div class="grow"><span class="badge b-active" id="chkCount">0 / 6</span></div>
+                        </div>
+                        <div id="chkList"></div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <div id="modal" hidden></div>
+    <div id="toasts" aria-live="polite"></div>
+
+    <script>
+        (function() {
+                'use strict';
+                /* ======================= helpers ======================= */
+                const $ = (s, r = document) => r.querySelector(s),
+                    $$ = (s, r = document) => Array.from(r.querySelectorAll(s));
+                const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({
+                    '&': '&amp;',
+                    '<': '&lt;',
+                    '>': '&gt;',
+                    '"': '&quot;',
+                    "'": '&#39;'
+                }[c]));
+                const ic = (n, c = '') => `<svg class="ic ${c}" aria-hidden="true"><use href="#i-${n}"/></svg>`;
+                const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+                const pad = n => String(n).padStart(2, '0');
+                const KEY = 'warden6.v1';
+                const PRI = {
+                    critical: 4,
+                    high: 3,
+                    medium: 2,
+                    low: 1
+                };
+                const RC = {
+                    5: ['Normal', 'Routine operations'],
+                    4: ['Guarded', 'Increased awareness'],
+                    3: ['Elevated', 'Units on standby'],
+                    2: ['High', 'Forces ready to move'],
+                    1: ['Maximum', 'All hands on alert']
+                };
+                const RANKS = ['PVT', 'PFC', 'CPL', 'SGT', 'SSG', 'LT', 'CPT', 'MAJ', 'COL'];
+                const UNITS = ['Alpha', 'Bravo', 'Charlie', 'Delta', 'HQ'];
+
+                /* ======================= state ======================= */
+                const seed = () => ({
+                    user: {
+                        callsign: 'DEMO-1',
+                        rank: 'CPL'
+                    },
+                    readiness: 4,
+                    skin: 'od',
+                    scale: 1,
+                    calm: false,
+                    missions: [{
+                        id: uid(),
+                        code: 'NIGHT HERON',
+                        obj: 'Observe the ridge road and report vehicle movement after dark.',
+                        loc: 'Grid 38T MN 4821 7730',
+                        pri: 'high',
+                        status: 'active',
+                        prog: 60,
+                        due: '2026-10-21',
+                        created: 1
+                    }, {
+                        id: uid(),
+                        code: 'COBALT TIDE',
+                        obj: 'Escort the supply convoy from the port to the forward depot.',
+                        loc: 'Route Blue, Pier 4',
+                        pri: 'critical',
+                        status: 'active',
+                        prog: 35,
+                        due: '2026-10-18',
+                        created: 2
+                    }, {
+                        id: uid(),
+                        code: 'SILENT ANVIL',
+                        obj: 'Set up a mobile signal relay on the northern hill.',
+                        loc: 'Hill 214',
+                        pri: 'medium',
+                        status: 'planned',
+                        prog: 0,
+                        due: '2026-10-28',
+                        created: 3
+                    }, {
+                        id: uid(),
+                        code: 'GRANITE VEIL',
+                        obj: 'Clear and secure the abandoned quarry for a training exercise.',
+                        loc: 'Quarry Delta',
+                        pri: 'low',
+                        status: 'complete',
+                        prog: 100,
+                        due: '2026-10-09',
+                        created: 4
+                    }, {
+                        id: uid(),
+                        code: 'PALE LANTERN',
+                        obj: 'Check and restock the three forward medical caches.',
+                        loc: 'Caches 1 to 3',
+                        pri: 'medium',
+                        status: 'planned',
+                        prog: 10,
+                        due: '2026-11-02',
+                        created: 5
+                    }, {
+                        id: uid(),
+                        code: 'SABLE ARROW',
+                        obj: 'Practice a night river crossing with full equipment.',
+                        loc: 'Marker Bridge',
+                        pri: 'high',
+                        status: 'aborted',
+                        prog: 20,
+                        due: '2026-10-12',
+                        created: 6
+                    }],
+                    roster: [{
+                        id: uid(),
+                        name: 'Dela Cruz, Mateo',
+                        rank: 'SGT',
+                        unit: 'Alpha',
+                        spec: 'Team leader',
+                        status: 'ready'
+                    }, {
+                        id: uid(),
+                        name: 'Santos, Liza',
+                        rank: 'CPL',
+                        unit: 'Alpha',
+                        spec: 'Radio operator',
+                        status: 'deployed'
+                    }, {
+                        id: uid(),
+                        name: 'Reyes, Andres',
+                        rank: 'PFC',
+                        unit: 'Bravo',
+                        spec: 'Driver and mechanic',
+                        status: 'ready'
+                    }, {
+                        id: uid(),
+                        name: 'Navarro, Carla',
+                        rank: 'LT',
+                        unit: 'HQ',
+                        spec: 'Operations officer',
+                        status: 'ready'
+                    }, {
+                        id: uid(),
+                        name: 'Bautista, Jun',
+                        rank: 'SSG',
+                        unit: 'Charlie',
+                        spec: 'Logistics sergeant',
+                        status: 'leave'
+                    }, {
+                        id: uid(),
+                        name: 'Ramos, Elena',
+                        rank: 'CPT',
+                        unit: 'HQ',
+                        spec: 'Company commander',
+                        status: 'ready'
+                    }, {
+                        id: uid(),
+                        name: 'Garcia, Paolo',
+                        rank: 'PVT',
+                        unit: 'Delta',
+                        spec: 'Rifleman',
+                        status: 'deployed'
+                    }],
+                    gear: [{
+                        id: uid(),
+                        name: 'Field radio PRC-7',
+                        cat: 'Comms',
+                        qty: 14,
+                        min: 6
+                    }, {
+                        id: uid(),
+                        name: 'Trauma kit',
+                        cat: 'Medical',
+                        qty: 3,
+                        min: 8
+                    }, {
+                        id: uid(),
+                        name: 'Rations pack (24 h)',
+                        cat: 'Rations',
+                        qty: 120,
+                        min: 60
+                    }, {
+                        id: uid(),
+                        name: 'Diesel drum 200 L',
+                        cat: 'Fuel',
+                        qty: 5,
+                        min: 4
+                    }, {
+                        id: uid(),
+                        name: 'Utility truck',
+                        cat: 'Vehicles',
+                        qty: 4,
+                        min: 2
+                    }, {
+                        id: uid(),
+                        name: 'Night vision monocular',
+                        cat: 'Weapons',
+                        qty: 0,
+                        min: 4
+                    }, {
+                        id: uid(),
+                        name: 'Spare battery pack',
+                        cat: 'Comms',
+                        qty: 22,
+                        min: 10
+                    }],
+                    log: [],
+                    dismissed: [],
+                    checks: {},
+                    region: 'europe',
+                    wx: 0
+                });
+                let S;
+                try {
+                    const raw = localStorage.getItem(KEY);
+                    S = raw ? Object.assign(seed(), JSON.parse(raw)) : seed();
+                } catch (e) {
+                    S = seed();
+                }
+                const save = () => {
+                    try {
+                        localStorage.setItem(KEY, JSON.stringify(S));
+                    } catch (e) {}
+                };
+                const view = {
+                    mStatus: 'all',
+                    gStatus: 'all',
+                    rUnit: 'all',
+                    screen: 'dash'
+                };
+
+                /* ======================= time ======================= */
+                const MON = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
+                const dtg = (d = new Date()) => `${pad(d.getUTCDate())}${pad(d.getUTCHours())}${pad(d.getUTCMinutes())}Z ${MON[d.getUTCMonth()]} ${String(d.getUTCFullYear()).slice(2)}`;
+                const zulu = (d = new Date()) => `${pad(d.getUTCHours())}:${pad(d.getUTCMinutes())}:${pad(d.getUTCSeconds())}Z`;
+
+                function tickClock() {
+                    $('#dtg').innerHTML = dtg() + '<span class="zs"> ' + zulu() + '</span>';
+                }
+
+                /* ======================= log, toast, modal ======================= */
+                function addLog(text, type = '') {
+                    S.log.unshift({
+                        t: zulu(),
+                        text,
+                        type
+                    });
+                    S.log = S.log.slice(0, 60);
+                    save();
+                    renderLog();
+                }
+
+                function toast(msg, type = '', undo) {
+                    const el = document.createElement('div');
+                    el.className = 'toast ' + type;
+                    el.setAttribute('role', 'status');
+                    el.innerHTML = `${ic(type==='bad'?'alert':'check')}<span>${esc(msg)}</span>`;
+                    if (undo) {
+                        const b = document.createElement('button');
+                        b.className = 'btn sm';
+                        b.type = 'button';
+                        b.innerHTML = ic('undo') + 'Undo';
+                        b.onclick = () => {
+                            undo();
+                            el.remove();
+                        };
+                        el.appendChild(b);
+                    }
+                    $('#toasts').appendChild(el);
+                    setTimeout(() => el.remove(), undo ? 7000 : 3800);
+                }
+                let lastFocus = null;
+
+                function openModal(html, cls = '') {
+                    lastFocus = document.activeElement;
+                    const m = $('#modal');
+                    m.innerHTML = `<div class="mcard ${cls}" role="dialog" aria-modal="true">${html}</div>`;
+                    m.hidden = false;
+                    const f = $('input,select,textarea,button.btn', m);
+                    if (f) setTimeout(() => f.focus(), 30);
+                }
+
+                function closeModal() {
+                    const m = $('#modal');
+                    m.hidden = true;
+                    m.innerHTML = '';
+                    if (lastFocus && lastFocus.focus) try {
+                        lastFocus.focus()
+                    } catch (e) {}
+                }
+                const mHead = (icon, title) => `<div class="mhead">${ic(icon,'lg')}<h2>${esc(title)}</h2><button class="ibtn" type="button" data-act="close" aria-label="Close">${ic('x')}</button></div>`;
+
+                function confirmBox({
+                    title,
+                    text,
+                    label = 'Delete',
+                    icon = 'trash',
+                    onYes
+                }) {
+                    openModal(`${mHead('alert',title)}<div class="mbody"><p>${text}</p><div class="mfoot"><button class="btn ghost" type="button" data-act="close">Cancel</button><button class="btn danger solid" type="button" id="yesBtn">${ic(icon)}${esc(label)}</button></div></div>`, 'danger');
+                    $('#yesBtn').onclick = () => {
+                        closeModal();
+                        onYes();
+                    };
+                    setTimeout(() => {
+                        const g = $('.mfoot .btn.ghost');
+                        if (g) g.focus();
+                    }, 40);
+                }
+                document.addEventListener('keydown', e => {
+                    if (e.key === 'Escape' && !$('#modal').hidden) closeModal();
+                });
+                $('#modal').addEventListener('mousedown', e => {
+                    if (e.target.id === 'modal') closeModal();
+                });
+
+                /* ======================= navigation ======================= */
+                const TITLES = {
+                    dash: 'Command Dashboard',
+                    missions: 'Mission Board',
+                    intel: 'Allied Intel',
+                    roster: 'Personnel Roster',
+                    gear: 'Armory and Supply',
+                    comms: 'Secure Comms',
+                    manual: 'Field Manual'
+                };
+
+                function go(to, push = true) {
+                    if (!TITLES[to]) to = 'dash';
+                    view.screen = to;
+                    $$('.screen').forEach(s => s.hidden = s.id !== 's-' + to);
+                    $$('.nav').forEach(n => {
+                        if (n.dataset.to === to) n.setAttribute('aria-current', 'page');
+                        else n.removeAttribute('aria-current');
+                    });
+                    $('#screenTitle').textContent = TITLES[to];
+                    document.title = 'Warden-6 Command';
+                    if (push) {
+                        try {
+                            history.replaceState(null, '', '#' + to);
+                        } catch (e) {}
+                    }
+                    window.scrollTo({
+                        top: 0
+                    });
+                    if (to === 'intel' && intel.status === 'idle') loadIntel();
+                    if (to === 'dash') {
+                        loadWeather();
+                        startRadar();
+                    }
+                    if (to === 'comms') setTimeout(() => $('#termIn').focus(), 50);
+                }
+
+                /* ======================= render: shared ======================= */
+                function setRC(n) {
+                    S.readiness = n;
+                    save();
+                    $('#app').dataset.rc = n;
+                    $('#rcBadge').textContent = n;
+                    renderRC();
+                }
+
+                function renderRC() {
+                    $('#app').dataset.rc = S.readiness;
+                    $('#rcBadge').textContent = S.readiness;
+                    $('#rcGrid').innerHTML = [5, 4, 3, 2, 1].map(n => `<button class="rc-btn" type="button" data-act="rc" data-n="${n}" data-rc="${n}" aria-pressed="${S.readiness===n}"><b>${n}</b>${RC[n][0]}</button>`).join('');
+                    $('#rcText').textContent = `${RC[S.readiness][0]}: ${RC[S.readiness][1]}`;
+                }
+
+                function renderCounts() {
+                    $('#nMissions').textContent = S.missions.filter(m => m.status === 'active').length;
+                    $('#nRoster').textContent = S.roster.length;
+                    $('#nGear').textContent = S.gear.filter(g => gStatus(g) !== 'ok').length;
+                    $('#whoName').textContent = `${S.user.rank} ${S.user.callsign}`;
+                    $('#termPrompt').textContent = `${S.user.callsign.toLowerCase()}@warden6:~$`;
+                }
+                const gStatus = g => g.qty <= 0 ? 'out' : (g.qty <= g.min ? 'low' : 'ok');
+
+                function renderStats() {
+                    const act = S.missions.filter(m => m.status === 'active').length,
+                        done = S.missions.filter(m => m.status === 'complete').length;
+                    const ready = S.roster.filter(p => p.status === 'ready').length,
+                        low = S.gear.filter(g => gStatus(g) !== 'ok').length;
+                    const t = (i, n, l) => `<div class="panel stat">${ic(i)}<div><b>${n}</b><span>${l}</span></div></div>`;
+                    $('#stats').innerHTML = t('target', act, 'Active missions') + t('users', ready + ' / ' + S.roster.length, 'Soldiers ready') + t('alert', low, 'Low-stock items') + t('medal', done, 'Missions complete');
+                }
+
+                function renderLog() {
+                    const l = $('#logList');
+                    if (!l) return;
+                    l.innerHTML = S.log.length ? S.log.map(x => `<li><time>${esc(x.t)}</time><span class="${x.type?'t-'+x.type:''}">${esc(x.text)}</span></li>`).join('') : `<li><span class="muted">No activity yet. Add a mission or change readiness and it will appear here.</span></li>`;
+                }
+
+                function renderDashMissions() {
+                    const a = S.missions.filter(m => m.status === 'active' || m.status === 'planned').sort((x, y) => PRI[y.pri] - PRI[x.pri]).slice(0, 4);
+                    $('#dashMissions').innerHTML = a.length ? a.map(m => `<div><div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:5px"><b class="card-title" style="font-size:1.1rem">${esc(m.code)}</b><span class="badge b-${m.status}">${m.status}</span><span class="badge b-${m.pri}">${m.pri}</span><span class="mono tiny muted" style="margin-left:auto">${m.prog}%</span></div><div class="bar ${m.pri==='critical'?'crit':m.pri==='high'?'warn':''}"><i style="width:${m.prog}%"></i></div></div>`).join('') : `<div class="empty"><h3>No open missions</h3><p>Everything is complete. Create a new mission to see it here.</p></div>`;
+                }
+
+                /* ======================= missions ======================= */
+                function renderMissionChips() {
+                    const c = {
+                        all: S.missions.length
+                    };
+                    ['planned', 'active', 'complete', 'aborted'].forEach(s => c[s] = S.missions.filter(m => m.status === s).length);
+                    $('#mChips').innerHTML = ['all', 'planned', 'active', 'complete', 'aborted'].map(s => `<button class="chip" type="button" data-act="mchip" data-s="${s}" aria-pressed="${view.mStatus===s}">${s} <span class="mono">${c[s]}</span></button>`).join('');
+                }
+
+                function renderMissions() {
+                    renderMissionChips();
+                    const q = $('#mSearch').value.trim().toLowerCase(),
+                        pri = $('#mPri').value,
+                        sort = $('#mSort').value;
+                    let a = S.missions.filter(m => (view.mStatus === 'all' || m.status === view.mStatus) && (pri === 'all' || m.pri === pri) && (!q || (m.code + ' ' + m.obj + ' ' + m.loc).toLowerCase().includes(q)));
+                    a.sort((x, y) => sort === 'pri' ? PRI[y.pri] - PRI[x.pri] : sort === 'prog' ? y.prog - x.prog : sort === 'name' ? x.code.localeCompare(y.code) : y.created - x.created);
+                    const nxt = {
+                        planned: ['play', 'Launch'],
+                        active: ['check', 'Complete'],
+                        complete: ['refresh', 'Reopen'],
+                        aborted: ['refresh', 'Reinstate']
+                    };
+                    $('#mList').innerHTML = a.length ? a.map(m => `
+    <article class="panel card-wrap" style="padding:0"><div class="card pri-${m.pri}" style="border:0;border-left:6px solid var(--sev);background:transparent">
+      <div class="card-top"><h3 class="card-title">${esc(m.code)}</h3><span class="badge b-${m.status}">${m.status}</span><span class="badge b-${m.pri}">${ic('flag')}${m.pri}</span></div>
+      <p>${esc(m.obj)}</p>
+      <div class="card-meta"><span>${ic('pin')}${esc(m.loc||'No location')}</span><span>${ic('clock')}Due ${esc(m.due||'not set')}</span></div>
+      <div style="display:flex;align-items:center;gap:10px"><div class="bar ${m.pri==='critical'?'crit':m.pri==='high'?'warn':''}" style="flex:1"><i style="width:${m.prog}%"></i></div><span class="mono tiny">${m.prog}%</span></div>
+      <div class="card-actions">
+        <button class="btn sm ok" type="button" data-act="m-next" data-id="${m.id}">${ic(nxt[m.status][0])}${nxt[m.status][1]}</button>
+        ${m.status==='active'||m.status==='planned'?`<button class="btn sm ghost" type="button" data-act="m-abort" data-id="${m.id}">${ic('x')}Abort</button>`:''}
+        <div class="push"><button class="ibtn sm" type="button" data-act="m-edit" data-id="${m.id}" aria-label="Edit ${esc(m.code)}">${ic('edit')}</button>
+        <button class="ibtn sm danger" type="button" data-act="m-del" data-id="${m.id}" aria-label="Delete ${esc(m.code)}">${ic('trash')}</button></div>
+      </div></div></article>`).join(''):
+    `<div class="empty">${ic('target')}<h3>${S.missions.length?'No missions match':'No missions yet'}</h3><p>${S.missions.length?'Try a different search, status or priority filter.':'Create your first mission to start tracking objectives.'}</p><button class="btn solid" type="button" data-act="${S.missions.length?'m-reset':'mission-new'}">${ic(S.missions.length?'refresh':'plus')}${S.missions.length?'Clear filters':'New mission'}</button></div>`;
+}
+function missionForm(id){
+  const m=S.missions.find(x=>x.id===id)||{code:'',obj:'',loc:'',pri:'medium',status:'planned',prog:0,due:''};
+  const opt=(v,cur)=>`<option value="${v}" ${v===cur?'selected':''}>${v[0].toUpperCase()+v.slice(1)}</option>`;
+  openModal(`${mHead(id?'edit':'plus',id?'Edit mission':'New mission')}
+  <form class="mbody" id="mForm" novalidate>
+    <div class="form-grid">
+      <div class="field full"><label for="f-code">Codename</label><input class="in" id="f-code" maxlength="24" value="${esc(m.code)}" placeholder="e.g. IRON FALCON" autocomplete="off"><div class="err" id="e-code"></div></div>
+      <div class="field full"><label for="f-obj">Objective</label><textarea class="in" id="f-obj" maxlength="200" placeholder="What must this mission achieve?">${esc(m.obj)}</textarea><div class="err" id="e-obj"></div></div>
+      <div class="field"><label for="f-loc">Location</label><input class="in" id="f-loc" maxlength="40" value="${esc(m.loc)}" placeholder="Grid or place name" autocomplete="off"></div>
+      <div class="field"><label for="f-due">Due date</label><input class="in" id="f-due" type="date" value="${esc(m.due)}"></div>
+      <div class="field"><label for="f-pri">Priority</label><select class="in" id="f-pri">${['low','medium','high','critical'].map(v=>opt(v,m.pri)).join('')}</select></div>
+      <div class="field"><label for="f-status">Status</label><select class="in" id="f-status">${['planned','active','complete','aborted'].map(v=>opt(v,m.status)).join('')}</select></div>
+      <div class="field full"><label for="f-prog">Progress: <b id="f-prog-v">${m.prog}</b>%</label><input id="f-prog" type="range" min="0" max="100" step="5" value="${m.prog}"></div>
+    </div>
+    <div class="mfoot"><button class="btn ghost" type="button" data-act="close">Cancel</button><button class="btn solid" type="submit">${ic('check')}${id?'Save changes':'Create mission'}</button></div>
+  </form>`);
+  $('#f-prog').oninput=e=>$('#f-prog-v').textContent=e.target.value;
+  $('#f-status').onchange=e=>{ if(e.target.value==='complete'){ $('#f-prog').value=100; $('#f-prog-v').textContent=100; } };
+  $('#mForm').onsubmit=e=>{
+    e.preventDefault();
+    const code=$('#f-code').value.trim().toUpperCase(), obj=$('#f-obj').value.trim(); let ok=true;
+    const setE=(i,msg)=>{ $('#e-'+i).textContent=msg; $('#f-'+i).setAttribute('aria-invalid',msg?'true':'false'); if(msg) ok=false; };
+    setE('code',code.length<3?'Enter a codename of at least 3 characters.':(S.missions.some(x=>x.code===code&&x.id!==id)?'That codename is already in use.':''));
+    setE('obj',obj.length<10?'Describe the objective in at least 10 characters.':'');
+    if(!ok){ $('#mForm [aria-invalid="true"]').focus(); return; }
+    const data={code,obj,loc:$('#f-loc').value.trim(),due:$('#f-due').value,pri:$('#f-pri').value,status:$('#f-status').value,prog:+$('#f-prog').value};
+    if(id){ Object.assign(S.missions.find(x=>x.id===id),data); addLog(`Mission ${code} updated`,'ok'); toast(`${code} saved`,'ok'); }
+    else { S.missions.push({id:uid(),created:Date.now(),...data}); addLog(`Mission ${code} created`,'ok'); toast(`${code} created`,'ok'); }
+    save(); closeModal(); refreshAll();
+  };
+}
+function nextStatus(m){
+  const map={planned:['active',Math.max(m.prog,10)],active:['complete',100],complete:['active',90],aborted:['planned',m.prog]};
+  const [s,p]=map[m.status]; m.status=s; m.prog=p; save(); addLog(`${m.code} is now ${s}`,s==='complete'?'ok':''); toast(`${m.code}: ${s}`,'ok'); refreshAll();
+}
+
+/* ======================= intel / API ======================= */
+const REGIONS=['europe','asia','americas','africa','oceania'];
+const intel={status:'idle',data:[],source:'live',err:'',shown:12,
+  get region(){return S.region}};
+const CACHE=[
+ ['Germany','Berlin',83240525,357114,'🇩🇪','DEU','Western Europe','europe'],['France','Paris',67391582,551695,'🇫🇷','FRA','Western Europe','europe'],['Norway','Oslo',5379475,323802,'🇳🇴','NOR','Northern Europe','europe'],['Poland','Warsaw',37950802,312679,'🇵🇱','POL','Central Europe','europe'],
+ ['Japan','Tokyo',125836021,377930,'🇯🇵','JPN','Eastern Asia','asia'],['Philippines','Manila',109581078,342353,'🇵🇭','PHL','South-Eastern Asia','asia'],['South Korea','Seoul',51780579,100210,'🇰🇷','KOR','Eastern Asia','asia'],['Vietnam','Hanoi',97338583,331212,'🇻🇳','VNM','South-Eastern Asia','asia'],
+ ['Canada','Ottawa',38005238,9984670,'🇨🇦','CAN','North America','americas'],['Brazil','Brasília',212559409,8515767,'🇧🇷','BRA','South America','americas'],['Chile','Santiago',19116209,756102,'🇨🇱','CHL','South America','americas'],
+ ['Kenya','Nairobi',53771300,580367,'🇰🇪','KEN','Eastern Africa','africa'],['Egypt','Cairo',102334403,1002450,'🇪🇬','EGY','Northern Africa','africa'],['Ghana','Accra',31072945,238533,'🇬🇭','GHA','Western Africa','africa'],
+ ['Australia','Canberra',25687041,7692024,'🇦🇺','AUS','Australia and New Zealand','oceania'],['New Zealand','Wellington',5084300,270467,'🇳🇿','NZL','Australia and New Zealand','oceania'],['Fiji','Suva',896444,18272,'🇫🇯','FJI','Melanesia','oceania']
+].map(r=>({id:r[5],name:r[0],capital:r[1],pop:r[2],area:r[3],flag:r[4],sub:r[6],region:r[7]}));
+async function loadIntel(){
+  intel.status='loading'; intel.shown=12; renderIntel();
+  const ctrl=new AbortController(), t=setTimeout(()=>ctrl.abort(),9000);
+  try{
+    const r=await fetch(`https://restcountries.com/v3.1/region/${S.region}?fields=name,capital,population,area,flag,cca3,subregion`,{signal:ctrl.signal});
+    if(!r.ok) throw new Error('Server answered with status '+r.status);
+    const j=await r.json(); if(!Array.isArray(j)||!j.length) throw new Error('The feed returned no records');
+    intel.data=j.map(c=>({id:c.cca3,name:(c.name&&c.name.common)||'Unknown',capital:(c.capital&&c.capital[0])||'None listed',pop:c.population||0,area:c.area||0,flag:c.flag||'🏳',sub:c.subregion||S.region,region:S.region}));
+    intel.status='ok'; intel.source='live'; addLog(`Intel feed loaded: ${intel.data.length} ${S.region} records`,'ok');
+  }catch(e){
+    intel.status='error'; intel.err=e.name==='AbortError'?'The request timed out after 9 seconds.':(e.message==='Failed to fetch'?'The device could not reach the intel server.':e.message);
+    addLog('Intel feed failed: '+intel.err,'crit');
+  } finally { clearTimeout(t); }
+  renderIntel();
+}
+function useCache(){ intel.data=CACHE.filter(c=>c.region===S.region); intel.status='ok'; intel.source='cache'; intel.shown=12; addLog('Intel loaded from offline cache','warn'); renderIntel(); toast('Showing offline cache','warn'); }
+function renderIntel(){
+  $('#iRegions').innerHTML=REGIONS.map(r=>`<button class="chip" type="button" data-act="region" data-r="${r}" aria-pressed="${S.region===r}">${ic('globe')}${r}</button>`).join('');
+  $('#intelSrc').innerHTML=intel.status==='ok'?`<span class="src ${intel.source}">${ic(intel.source==='live'?'globe':'box')}${intel.source==='live'?'LIVE FEED':'OFFLINE CACHE'}</span>`:'';
+  const nd=S.dismissed.length; const rb=$('#iRestore'); rb.hidden=!nd; rb.innerHTML=`${ic('undo')}Restore dismissed (${nd})`;
+  const body=$('#iBody');
+  if(intel.status==='idle'||intel.status==='loading'){
+    body.innerHTML=`<div class="panel"><div class="state" role="status">${'<div class="spinner" aria-hidden="true"></div>'}<h3>Contacting intel server</h3><p>Downloading ${esc(S.region)} records. This can take a few seconds.</p></div><div class="grid g-auto" style="margin-top:14px">${'<div class="skel"></div>'.repeat(6)}</div></div>`; return;
+  }
+  if(intel.status==='error'){
+    body.innerHTML=`<div class="state error panel" role="alert">${ic('wifi-off')}<h3>Intel feed unavailable</h3><p>${esc(intel.err)} Check your connection and press Retry, or continue with the saved offline records.</p><div class="btn-row" style="justify-content:center"><button class="btn solid" type="button" data-act="intel-reload">${ic('refresh')}Retry</button><button class="btn" type="button" data-act="intel-cache">${ic('box')}Use offline cache</button></div></div>`; return;
+  }
+  const q=$('#iSearch').value.trim().toLowerCase(), sort=$('#iSort').value;
+  let a=intel.data.filter(c=>!S.dismissed.includes(c.id)&&(!q||(c.name+' '+c.capital+' '+c.sub).toLowerCase().includes(q)));
+  a.sort((x,y)=>sort==='pop'?y.pop-x.pop:sort==='area'?y.area-x.area:x.name.localeCompare(y.name));
+  if(!a.length){ body.innerHTML=`<div class="empty panel">${ic('search')}<h3>No records to show</h3><p>${nd?'You dismissed every matching record, or the search found nothing.':'No record matches your search.'}</p><div class="btn-row">${nd?`<button class="btn solid" type="button" data-act="intel-restore">${ic('undo')}Restore dismissed</button>`:''}<button class="btn ghost" type="button" data-act="intel-clear">${ic('x')}Clear search</button></div></div>`; return; }
+  const shown=a.slice(0,intel.shown), f=n=>n.toLocaleString('en-US');
+  body.innerHTML=`<div class="muted tiny mono" style="margin-bottom:8px">Showing ${shown.length} of ${a.length} records</div>
+  <div class="grid g-auto">${shown.map(c=>`
+   <article class="panel" style="display:grid;gap:12px">
+     <div style="display:flex;gap:12px;align-items:center"><span class="flag" aria-hidden="true">${esc(c.flag)}</span><div style="min-width:0"><h3 class="card-title" style="font-size:1.3rem">${esc(c.name)}</h3><div class="muted tiny">${esc(c.sub)}</div></div><span class="badge b-low" style="margin-left:auto">${esc(c.id)}</span></div>
+     <dl class="kv" style="margin:0"><dt>Capital</dt><dd>${esc(c.capital)}</dd><dt>Population</dt><dd>${f(c.pop)}</dd><dt>Area</dt><dd>${f(c.area)} km²</dd></dl>
+     <div class="card-actions"><button class="btn sm" type="button" data-act="intel-mission" data-id="${esc(c.id)}">${ic('target')}Recon mission</button>
+       <div class="push"><button class="ibtn sm danger" type="button" data-act="intel-del" data-id="${esc(c.id)}" aria-label="Dismiss ${esc(c.name)}">${ic('trash')}</button></div></div>
+   </article>`).join('')}</div>
+   ${a.length>shown.length?`<div style="display:grid;place-items:center;margin-top:6px"><button class="btn" type="button" data-act="intel-more">${ic('down')}Load more (${a.length-shown.length} left)</button></div>`:''}`;
+}
+
+/* ======================= roster ======================= */
+function insignia(rank){
+  const n={PVT:1,PFC:2,CPL:2,SGT:3,SSG:3,LT:1,CPT:2,MAJ:2,COL:3}[rank]||1; let p='';
+  for(let i=0;i<n;i++){ const y=8+i*6; p+=`<polyline points="6,${y+6} 16,${y} 26,${y+6}"/>`; }
+  return `<svg viewBox="0 0 32 32" aria-hidden="true">${p}${['LT','CPT','MAJ','COL'].includes(rank)?'<path d="M16 24l1.6 3.2 3.6.5-2.6 2.5.6 3.5L16 31.900"/>':''}</svg>`;
+}
+function renderRoster(){
+  $('#rChips').innerHTML=['all',...UNITS].map(u=>`<button class="chip" type="button" data-act="rchip" data-u="${u}" aria-pressed="${view.rUnit===u}">${u} <span class="mono">${u==='all'?S.roster.length:S.roster.filter(p=>p.unit===u).length}</span></button>`).join('');
+  const q=$('#rSearch').value.trim().toLowerCase();
+  const a=S.roster.filter(p=>(view.rUnit==='all'||p.unit===view.rUnit)&&(!q||(p.name+' '+p.spec).toLowerCase().includes(q))).sort((x,y)=>RANKS.indexOf(y.rank)-RANKS.indexOf(x.rank));
+  $('#rList').innerHTML=a.length?a.map(p=>`<article class="panel" style="display:grid;gap:12px">
+    <div class="person"><div class="rank" title="${p.rank}">${insignia(p.rank)}</div><div style="min-width:0"><h3>${esc(p.name)}</h3><div class="muted tiny mono">${p.rank} · ${esc(p.unit)}</div></div></div>
+    <div class="card-meta"><span>${ic('tag')}${esc(p.spec||'No specialty')}</span></div>
+    <div class="card-actions"><button class="btn sm ghost" type="button" data-act="p-status" data-id="${p.id}" title="Click to change status"><span class="badge b-${p.status}" style="border:0;padding:0">${p.status}</span></button>
+      <div class="push"><button class="ibtn sm" type="button" data-act="p-edit" data-id="${p.id}" aria-label="Edit ${esc(p.name)}">${ic('edit')}</button><button class="ibtn sm danger" type="button" data-act="p-del" data-id="${p.id}" aria-label="Remove ${esc(p.name)}">${ic('trash')}</button></div></div>
+  </article>`).join(''):`<div class="empty" style="grid-column:1/-1">${ic('users')}<h3>${S.roster.length?'No soldiers match':'Roster is empty'}</h3><p>${S.roster.length?'Change the unit filter or clear the search.':'Add the first soldier to build your roster.'}</p><button class="btn solid" type="button" data-act="${S.roster.length?'r-reset':'person-new'}">${ic(S.roster.length?'refresh':'plus')}${S.roster.length?'Clear filters':'Add soldier'}</button></div>`;
+}
+function personForm(id){
+  const p=S.roster.find(x=>x.id===id)||{name:'',rank:'PVT',unit:'Alpha',spec:'',status:'ready'};
+  const sel=(arr,cur)=>arr.map(v=>`<option ${v===cur?'selected':''}>${v}</option>`).join('');
+  openModal(`${mHead(id?'edit':'plus',id?'Edit soldier':'Add soldier')}
+  <form class="mbody" id="pForm" novalidate><div class="form-grid">
+    <div class="field full"><label for="p-name">Name (Last, First)</label><input class="in" id="p-name" maxlength="40" value="${esc(p.name)}" placeholder="e.g. Cruz, Maria" autocomplete="off"><div class="err" id="e-p-name"></div></div>
+    <div class="field"><label for="p-rank">Rank</label><select class="in" id="p-rank">${sel(RANKS,p.rank)}</select></div>
+    <div class="field"><label for="p-unit">Unit</label><select class="in" id="p-unit">${sel(UNITS,p.unit)}</select></div>
+    <div class="field"><label for="p-spec">Specialty</label><input class="in" id="p-spec" maxlength="40" value="${esc(p.spec)}" placeholder="e.g. Medic" autocomplete="off"></div>
+    <div class="field"><label for="p-status">Status</label><select class="in" id="p-status">${['ready','deployed','leave'].map(v=>`<option ${v===p.status?'selected':''} value="${v}">${v[0].toUpperCase()+v.slice(1)}</option>`).join('')}</select></div>
+  </div><div class="mfoot"><button class="btn ghost" type="button" data-act="close">Cancel</button><button class="btn solid" type="submit">${ic('check')}${id?'Save changes':'Add to roster'}</button></div></form>`);
+  $('#pForm').onsubmit=e=>{ e.preventDefault(); const name=$('#p-name').value.trim();
+    if(name.length<3){ $('#e-p-name').textContent='Enter a name of at least 3 characters.'; $('#p-name').setAttribute('aria-invalid','true'); $('#p-name').focus(); return; }
+    const d={name,rank:$('#p-rank').value,unit:$('#p-unit').value,spec:$('#p-spec').value.trim(),status:$('#p-status').value};
+    if(id){ Object.assign(S.roster.find(x=>x.id===id),d); addLog(`${name} updated`,'ok'); toast('Soldier saved','ok'); } else { S.roster.push({id:uid(),...d}); addLog(`${name} added to ${d.unit}`,'ok'); toast(`${name} added`,'ok'); }
+    save(); closeModal(); refreshAll(); };
+}
+
+/* ======================= armory ======================= */
+const CATI={Weapons:'crosshair',Comms:'radio',Medical:'medkit',Vehicles:'jeep',Rations:'box',Fuel:'fuel'};
+function renderGear(){
+  const tot=S.gear.reduce((a,g)=>a+g.qty,0), low=S.gear.filter(g=>gStatus(g)==='low').length, out=S.gear.filter(g=>gStatus(g)==='out').length;
+  const t=(i,n,l)=>`<div class="panel stat">${ic(i)}<div><b>${n}</b><span>${l}</span></div></div>`;
+  $('#gearStats').innerHTML=t('box',tot.toLocaleString('en-US'),'Units in stock')+t('alert',low,'Low stock')+t('x',out,'Out of stock');
+  $('#gChips').innerHTML=['all','ok','low','out'].map(s=>`<button class="chip" type="button" data-act="gchip" data-s="${s}" aria-pressed="${view.gStatus===s}">${s==='ok'?'In stock':s==='all'?'All':s==='low'?'Low':'Out'}</button>`).join('');
+  const q=$('#gSearch').value.trim().toLowerCase();
+  const a=S.gear.filter(g=>(view.gStatus==='all'||gStatus(g)===view.gStatus)&&(!q||(g.name+' '+g.cat).toLowerCase().includes(q)));
+  $('#gTable').innerHTML=a.length?`<table><thead><tr><th>Item</th><th>Category</th><th class="num">Quantity</th><th class="num">Reorder at</th><th>Status</th><th><span class="sr">Actions</span></th></tr></thead><tbody>${a.map(g=>{const s=gStatus(g);return `<tr>
+    <td><b style="display:inline-flex;gap:8px;align-items:center">${ic(CATI[g.cat]||'box')}${esc(g.name)}</b></td><td>${esc(g.cat)}</td>
+    <td class="num"><span class="stepper"><button class="ibtn sm" type="button" data-act="g-dec" data-id="${g.id}" aria-label="Decrease ${esc(g.name)}">${ic('minus')}</button><output aria-live="polite">${g.qty}</output><button class="ibtn sm" type="button" data-act="g-inc" data-id="${g.id}" aria-label="Increase ${esc(g.name)}">${ic('plus')}</button></span></td>
+    <td class="num">${g.min}</td>
+    <td><span class="badge ${s==='ok'?'b-complete':s==='low'?'b-active':'b-aborted'}">${s==='ok'?'In stock':s==='low'?'Low':'Out'}</span></td>
+    <td><button class="ibtn sm danger" type="button" data-act="g-del" data-id="${g.id}" aria-label="Delete ${esc(g.name)}">${ic('trash')}</button></td></tr>`}).join('')}</tbody></table>`:
+    `<div class="empty" style="border:0">${ic('box')}<h3>${S.gear.length?'No items match':'Armory is empty'}</h3><p>${S.gear.length?'Change the filter or search.':'Add an item with the form above.'}</p></div>`;
+}
+$('#gearForm').addEventListener('submit',e=>{
+  e.preventDefault(); const name=$('#g-name').value.trim(), qty=$('#g-qty').value, min=$('#g-min').value; let ok=true;
+  const setE=(k,m)=>{ $('#e-g-'+k).textContent=m; $('#g-'+k).setAttribute('aria-invalid',m?'true':'false'); if(m) ok=false; };
+  setE('name',name.length<2?'Enter an item name.':''); setE('qty',(qty===''||+qty<0||+qty>9999)?'Use a number from 0 to 9999.':''); setE('min',(min===''||+min<0||+min>9999)?'Use a number from 0 to 9999.':'');
+  if(!ok) return;
+  S.gear.push({id:uid(),name,cat:$('#g-cat').value,qty:+qty,min:+min}); save(); addLog(`Armory: added ${name}`,'ok'); toast(`${name} added`,'ok');
+  $('#g-name').value=''; refreshAll();
+});
+
+/* ======================= weather (API) ======================= */
+const SITES=[['Forward Base Manila',14.6,120.98],['Camp Cebu',10.32,123.89],['Outpost Davao',7.19,125.46],['Station Baguio',16.41,120.59]];
+const WX={0:'Clear sky',1:'Mostly clear',2:'Partly cloudy',3:'Overcast',45:'Fog',48:'Rime fog',51:'Light drizzle',53:'Drizzle',55:'Heavy drizzle',61:'Light rain',63:'Rain',65:'Heavy rain',80:'Rain showers',81:'Showers',82:'Violent showers',95:'Thunderstorm',96:'Thunderstorm, hail',99:'Severe thunderstorm'};
+let wxToken=0;
+async function loadWeather(){
+  const site=SITES[S.wx]||SITES[0], tok=++wxToken, b=$('#wxBody');
+  b.innerHTML=`<div class="state" style="padding:20px" role="status"><div class="spinner" aria-hidden="true"></div><p>Reading ${esc(site[0])} conditions...</p></div>`;
+  const ctrl=new AbortController(), t=setTimeout(()=>ctrl.abort(),8000);
+  try{
+    const r=await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${site[1]}&longitude=${site[2]}&current=temperature_2m,relative_humidity_2m,wind_speed_10m,weather_code`,{signal:ctrl.signal});
+    if(!r.ok) throw new Error('status '+r.status); const j=await r.json(); const c=j.current; if(!c) throw new Error('no data');
+    if(tok!==wxToken) return;
+    b.innerHTML=`<div style="display:flex;gap:14px;align-items:center;margin-bottom:10px">${ic('cloud','xl')}<div><div class="stat"><b style="font-size:2.4rem">${Math.round(c.temperature_2m)}°C</b></div><div class="muted">${esc(WX[c.weather_code]||'Unknown conditions')}</div></div></div>
+    <dl class="kv" style="margin:0"><dt>Humidity</dt><dd>${c.relative_humidity_2m}%</dd><dt>Wind</dt><dd>${c.wind_speed_10m} km/h</dd><dt>Site</dt><dd>${esc(site[0])}</dd></dl>`;
+  }catch(e){ if(tok!==wxToken) return;
+    b.innerHTML=`<div class="state error" role="alert" style="padding:20px">${ic('wifi-off')}<h3>Weather offline</h3><p>Could not read conditions for ${esc(site[0])}. Check your connection and retry.</p><button class="btn sm" type="button" data-act="wx-reload">${ic('refresh')}Retry</button></div>`;
+  } finally{ clearTimeout(t); }
+}
+
+/* ======================= comms terminal ======================= */
+const term={hist:[],i:0};
+const out=(t,c='')=>{ const o=$('#termOut'); const d=document.createElement('div'); if(c) d.className=c; d.textContent=t; o.appendChild(d); o.scrollTop=o.scrollHeight; };
+const CMDS={
+  help(){ return ['COMMANDS','  status            unit summary','  missions          list missions','  roster            list soldiers','  gear              supply summary','  readiness <1-5>   set readiness condition','  theme <od|desert|night|naval>','  go <screen>       dash missions intel roster gear manual','  radio <message>   transmit a message to the log','  time              current date-time group','  whoami            show your callsign','  ping              test the link','  clear             clear screen'].join('\n'); },
+  status(){ const a=S.missions.filter(m=>m.status==='active').length; return `READINESS ${S.readiness} (${RC[S.readiness][0]})\nMISSIONS  ${a} active of ${S.missions.length}\nROSTER    ${S.roster.filter(p=>p.status==='ready').length} ready of ${S.roster.length}\nARMORY    ${S.gear.filter(g=>gStatus(g)!=='ok').length} items need restock`; },
+  missions(){ return S.missions.length?S.missions.map(m=>`${m.code.padEnd(14)} ${m.status.padEnd(9)} ${m.pri.padEnd(9)} ${String(m.prog).padStart(3)}%`).join('\n'):'No missions on file.'; },
+  roster(){ return S.roster.length?S.roster.map(p=>`${p.rank.padEnd(4)} ${p.name.padEnd(22)} ${p.unit.padEnd(8)} ${p.status}`).join('\n'):'Roster is empty.'; },
+  gear(){ return S.gear.length?S.gear.map(g=>`${g.name.padEnd(26)} ${String(g.qty).padStart(4)}  ${gStatus(g).toUpperCase()}`).join('\n'):'Armory is empty.'; },
+  readiness(a){ const n=parseInt(a,10); if(!(n>=1&&n<=5)) return ['bad','Usage: readiness <1-5>']; setRC(n); addLog(`Readiness set to ${n} from comms`,n<=2?'crit':n===3?'warn':'ok'); return ['ok',`Readiness set to ${n}: ${RC[n][0]}`]; },
+  theme(a){ const m={od:'od',green:'od',desert:'desert',night:'night',naval:'naval'}[(a||'').toLowerCase()]; if(!m) return ['bad','Usage: theme <od|desert|night|naval>']; setSkin(m); return ['ok','Skin changed to '+m]; },
+  go(a){ const k=(a||'').toLowerCase(); if(!TITLES[k]||k==='comms') return ['bad','Usage: go <dash|missions|intel|roster|gear|manual>']; go(k); return ['ok','Opening '+TITLES[k]]; },
+  radio(...w){ const m=w.join(' ').trim(); if(!m) return ['bad','Usage: radio <message>']; addLog(`RADIO ${S.user.callsign}: ${m}`); return ['ok','Transmitted. Logged at '+zulu()]; },
+  time(){ return dtg()+'  '+zulu(); },
+  whoami(){ return `${S.user.rank} ${S.user.callsign}`; },
+  ping(){ return ['ok','Link established. 12 ms. Signal 5 of 5.']; },
+  clear(){ $('#termOut').innerHTML=''; return null; }
+};
+function runCmd(line){
+  const raw=line.trim(); if(!raw) return;
+  out(`${S.user.callsign.toLowerCase()}@warden6:~$ ${raw}`,'cmd'); term.hist.push(raw); term.i=term.hist.length;
+  const [c,...a]=raw.split(/\s+/); const f=CMDS[c.toLowerCase()];
+  if(!f){ out(`Unknown command: ${c}. Type help for the list.`,'bad'); return; }
+  const r=f(...a); if(r==null) return; if(Array.isArray(r)) out(r[1],r[0]); else out(r);
+}
+$('#termForm').addEventListener('submit',e=>{ e.preventDefault(); const i=$('#termIn'); runCmd(i.value); i.value=''; i.focus(); });
+$('#termIn').addEventListener('keydown',e=>{
+  if(e.key==='ArrowUp'&&term.hist.length){ e.preventDefault(); term.i=Math.max(0,term.i-1); e.target.value=term.hist[term.i]||''; }
+  if(e.key==='ArrowDown'&&term.hist.length){ e.preventDefault(); term.i=Math.min(term.hist.length,term.i+1); e.target.value=term.hist[term.i]||''; }
+});
+$('#term').addEventListener('click',()=>{ if(!getSelection().toString()) $('#termIn').focus(); });
+$('#cmdChips').innerHTML=['help','status','missions','roster','gear','time','ping'].map(c=>`<button class="chip" type="button" data-cmd="${c}">${ic('terminal')}${c}</button>`).join('');
+
+/* ======================= manual content ======================= */
+const FEATS=[['target','Mission board','Create, edit, filter, sort and advance missions through planned, active and complete.'],['globe','Live intel','Country records loaded from a public API with loading, error and empty states.'],['users','Roster','Soldiers with rank insignia, units, specialties and a one-tap status change.'],['box','Armory','Quantity steppers with automatic low-stock and out-of-stock warnings.'],['terminal','Comms terminal','Type commands to read data, change readiness, switch skins and send radio logs.'],['radar','Radar scope','An animated scope that plots every mission by priority.'],['cloud','Field weather','Current conditions for four sites, fetched live from a second API.'],['sliders','Display skins','Four looks: OD green, desert, night vision and naval, plus text size.'],['lock','Operator sign-in','Set your callsign with a validated sign-in form.']];
+const REQ=[['AppBar and titles','Sticky top bar with brand, section title, clock and readiness.'],['Text and colors','Four tested skins with high-contrast text on dark panels.'],['Fonts and assets','Stencil, condensed and mono fonts plus a 40-icon SVG set.'],['Stateless and Stateful widgets','Pure render functions for display; one state object for changing data.'],['Custom widgets','Reusable builders: panel, badge, chip, stat tile, modal, toast.'],['ListView.builder','Mission, roster, intel and gear lists are built from data arrays.'],['API integration','REST Countries and Open-Meteo, with timeouts.'],['Delete functionality','Every list has delete, a confirmation dialog and an Undo toast.'],['Navigation','Sidebar on desktop, bottom tab bar on phones, deep links by #hash.'],['User interaction and state','Forms, filters, steppers and toggles update the screen at once.'],['Error and loading handling','Spinner and skeletons, error card with Retry, empty states.'],['Additional features','Search, sort, add, edit, validation, sign-in, offline cache, terminal.']];
+const HCI=[['Consistency','Same buttons, badges and icons on every screen.','shield'],['Visibility','Active section is highlighted; counts show what needs attention.','eye'],['Feedback','Toasts confirm saves, deletes and status changes.','bolt'],['User control','Cancel on every form, Undo after every delete.','undo'],['Error prevention','Validation text appears beside the field and confirms before deleting.','alert'],['Simplicity','One task per screen, plain labels.','check'],['Readability','Large text, 44 px touch targets, text size control.','search'],['Responsive layout','Grid reflows to one column and a bottom tab bar on phones.','map']];
+const CHK=['Introduce the app: name, purpose, intended users','Demonstrate the main features (missions, roster, armory)','Demonstrate API integration (Allied intel, Field weather)','Demonstrate delete with confirmation and Undo','Demonstrate additional features (terminal, skins, sign-in)','Prepare answers about code and design decisions'];
+function renderManual(){
+  $('#featGrid').innerHTML=FEATS.map(f=>`<div class="feat">${ic(f[0])}<h4>${f[1]}</h4><p>${f[2]}</p></div>`).join('');
+  $('#reqTable').innerHTML=`<thead><tr><th style="width:40px"></th><th>Requirement</th><th>Where it lives in Warden-6</th></tr></thead><tbody>${REQ.map(r=>`<tr><td>${ic('check','ok-ic')}</td><td><b>${r[0]}</b></td><td>${r[1]}</td></tr>`).join('')}</tbody>`;
+  $('#hciList').innerHTML=HCI.map(h=>`<div class="card" style="--sev:var(--accent2);grid-template-columns:auto 1fr;align-items:start"><span style="color:var(--accent)">${ic(h[2],'lg')}</span><div><h4 class="card-title" style="font-size:1.1rem">${h[0]}</h4><p class="muted">${h[1]}</p></div></div>`).join('');
+  $('#chkList').innerHTML=CHK.map((c,i)=>`<label class="check"><input type="checkbox" data-act="chk" data-i="${i}" ${S.checks[i]?'checked':''}><span>${esc(c)}</span></label>`).join('');
+  $('#chkCount').textContent=`${Object.values(S.checks).filter(Boolean).length} / ${CHK.length}`;
+}
+
+/* ======================= skins, settings, sign-in ======================= */
+function camo(){
+  const cs=getComputedStyle(document.documentElement), c=[1,2,3,4].map(i=>cs.getPropertyValue('--camo'+i).trim()||'#222');
+  let seedv=11; const r=()=>(seedv=(seedv*16807)%2147483647)/2147483647, W=520;
+  let s=`<svg xmlns='http://www.w3.org/2000/svg' width='${W}' height='${W}'><rect width='${W}' height='${W}' fill='${c[0]}'/>`;
+  for(let i=0;i<40;i++){ const col=c[1+i%3], x=r()*W, y=r()*W, rx=34+r()*80, ry=16+r()*38, rot=(r()*180).toFixed(0);
+    for(const dx of [-W,0,W]) for(const dy of [-W,0,W]) s+=`<ellipse cx='${(x+dx).toFixed(0)}' cy='${(y+dy).toFixed(0)}' rx='${rx.toFixed(0)}' ry='${ry.toFixed(0)}' fill='${col}' transform='rotate(${rot} ${(x+dx).toFixed(0)} ${(y+dy).toFixed(0)})'/>`; }
+  s+='</svg>';
+  document.documentElement.style.setProperty('--camo-img',`url("data:image/svg+xml,${encodeURIComponent(s)}")`);
+}
+function setSkin(k){ S.skin=k; document.documentElement.dataset.skin=k; save(); camo(); radarPal(); }
+function applyScale(){ document.documentElement.style.setProperty('--scale',S.scale); }
+function applyCalm(){ document.body.classList.toggle('calm',!!S.calm); }
+function settings(){
+  const sk=[['od','OD green','#4b5d2e','#1c2313'],['desert','Desert','#c58b4e','#33261a'],['night','Night vision','#3dff7a','#05200d'],['naval','Naval','#63b8ec','#102234']];
+  openModal(`${mHead('sliders','Display and data')}<div class="mbody">
+    <div><div class="lbl" style="margin-bottom:8px">Skin</div><div class="skins">${sk.map(s=>`<button class="skin" type="button" data-act="skin" data-k="${s[0]}" aria-pressed="${S.skin===s[0]}"><i style="--a:${s[2]};--b:${s[3]}"></i>${s[1]}</button>`).join('')}</div></div>
+    <div><div class="lbl" style="margin-bottom:8px">Text size</div><div class="btn-row"><button class="btn ghost" type="button" data-act="scale" data-d="-0.1">${ic('minus')}Smaller</button><button class="btn ghost" type="button" data-act="scale" data-d="0">Default</button><button class="btn ghost" type="button" data-act="scale" data-d="0.1">${ic('plus')}Larger</button></div></div>
+    <label class="check" style="border:0"><input type="checkbox" data-act="calm" ${S.calm?'checked':''}><span><b>Reduce motion</b><br><span class="muted tiny">Stops the ticker, pulse and radar sweep.</span></span></label>
+    <div><div class="lbl" style="margin-bottom:8px">Data</div><button class="btn danger" type="button" data-act="reset-all">${ic('refresh')}Reset all data</button></div>
+    <div class="mfoot"><button class="btn solid" type="button" data-act="close">Done</button></div></div>`);
+}
+function signin(){
+  openModal(`${mHead('lock','Operator sign-in')}<form class="mbody" id="sForm" novalidate>
+    <p class="muted">Set your callsign for this console. Demo passcode: <b class="mono" style="color:var(--accent)">WARDEN6</b></p>
+    <div class="form-grid">
+      <div class="field"><label for="s-call">Callsign</label><input class="in" id="s-call" maxlength="12" value="${esc(S.user.callsign)}" autocomplete="off"><div class="err" id="e-s-call"></div></div>
+      <div class="field"><label for="s-rank">Rank</label><select class="in" id="s-rank">${RANKS.map(r=>`<option ${r===S.user.rank?'selected':''}>${r}</option>`).join('')}</select></div>
+      <div class="field full"><label for="s-pass">Passcode</label><div style="display:flex;gap:8px"><input class="in" id="s-pass" type="password" autocomplete="off" placeholder="Enter passcode"><button class="ibtn" type="button" data-act="showpass" aria-label="Show or hide passcode">${ic('eye')}</button></div><div class="err" id="e-s-pass"></div></div>
+    </div>
+    <div class="mfoot"><button class="btn ghost" type="button" data-act="demo-access">${ic('bolt')}Fill demo passcode</button><button class="btn solid" type="submit">${ic('lock')}Sign in</button></div></form>`);
+  $('#sForm').onsubmit=e=>{ e.preventDefault(); const c=$('#s-call').value.trim().toUpperCase(), p=$('#s-pass').value.trim().toUpperCase(); let ok=true;
+    if(!/^[A-Z0-9-]{3,12}$/.test(c)){ $('#e-s-call').textContent='Use 3 to 12 letters, numbers or hyphens.'; $('#s-call').setAttribute('aria-invalid','true'); ok=false; } else { $('#e-s-call').textContent=''; $('#s-call').setAttribute('aria-invalid','false'); }
+    if(p!=='WARDEN6'){ $('#e-s-pass').textContent=p?'Wrong passcode. Try the demo passcode shown above.':'Enter the passcode.'; $('#s-pass').setAttribute('aria-invalid','true'); ok=false; } else { $('#e-s-pass').textContent=''; }
+    if(!ok){ ($('#sForm [aria-invalid="true"]')||$('#s-pass')).focus(); return; }
+    S.user={callsign:c,rank:$('#s-rank').value}; save(); closeModal(); renderCounts(); addLog(`${S.user.rank} ${c} signed in`,'ok'); toast(`Welcome, ${S.user.rank} ${c}`,'ok'); };
+}
+
+/* ======================= radar ======================= */
+let rAF=0, rPal={}, rAng=0;
+function radarPal(){ const cs=getComputedStyle(document.documentElement); rPal={a:cs.getPropertyValue('--accent2').trim(),b:cs.getPropertyValue('--accent').trim(),c:cs.getPropertyValue('--crit').trim(),w:cs.getPropertyValue('--warn').trim(),i:cs.getPropertyValue('--info').trim(),m:cs.getPropertyValue('--mut').trim()}; }
+function hash(s){ let h=0; for(const ch of s) h=(h*31+ch.charCodeAt(0))>>>0; return h; }
+function drawRadar(){
+  const cv=$('#radar'); if(!cv||view.screen!=='dash'){ rAF=0; return; }
+  const dpr=Math.min(2,window.devicePixelRatio||1), size=Math.round(cv.clientWidth*dpr)||400;
+  if(cv.width!==size){ cv.width=size; cv.height=size; }
+  const g=cv.getContext('2d'), R=size/2; g.clearRect(0,0,size,size);
+  g.lineWidth=Math.max(1,dpr); g.strokeStyle=rPal.a; g.globalAlpha=.55;
+  for(let i=1;i<=4;i++){ g.beginPath(); g.arc(R,R,R*i/4-2,0,6.283); g.stroke(); }
+  g.beginPath(); g.moveTo(R,0); g.lineTo(R,size); g.moveTo(0,R); g.lineTo(size,R); g.stroke();
+  g.globalAlpha=.25; for(let a=0;a<360;a+=30){ const r=a*Math.PI/180; g.beginPath(); g.moveTo(R,R); g.lineTo(R+Math.cos(r)*R,R+Math.sin(r)*R); g.stroke(); }
+  g.globalAlpha=1;
+  // sweep
+  for(let k=0;k<40;k++){ const a=rAng-k*0.022; g.beginPath(); g.moveTo(R,R); g.arc(R,R,R-2,a-0.022,a); g.closePath(); g.fillStyle=rPal.b; g.globalAlpha=.34*(1-k/40); g.fill(); }
+  g.globalAlpha=1; g.strokeStyle=rPal.b; g.lineWidth=2*dpr; g.beginPath(); g.moveTo(R,R); g.lineTo(R+Math.cos(rAng)*(R-2),R+Math.sin(rAng)*(R-2)); g.stroke();
+  // blips
+  S.missions.forEach(m=>{ const h=hash(m.id+m.code), ang=(h%360)*Math.PI/180, rr=(1-(PRI[m.pri]-0.4)/4.6)*(R-14)+8*dpr;
+    const x=R+Math.cos(ang)*rr, y=R+Math.sin(ang)*rr; let d=(rAng-ang)%6.283; if(d<0) d+=6.283; const glow=Math.max(0,1-d/3.5);
+    const col=m.status==='aborted'?rPal.m:m.pri==='critical'?rPal.c:m.pri==='high'?rPal.w:rPal.i;
+    g.fillStyle=col; g.globalAlpha=m.status==='complete'?.35:.4+glow*.6; g.beginPath(); g.arc(x,y,(3.5+glow*3)*dpr,0,6.283); g.fill();
+    g.globalAlpha=glow*.5; g.strokeStyle=col; g.lineWidth=dpr; g.beginPath(); g.arc(x,y,(8+glow*10)*dpr,0,6.283); g.stroke(); g.globalAlpha=1; });
+  g.fillStyle=rPal.b; g.beginPath(); g.arc(R,R,3*dpr,0,6.283); g.fill();
+  if(!S.calm && !matchMedia('(prefers-reduced-motion: reduce)').matches){ rAng=(rAng+0.018)%6.283; rAF=requestAnimationFrame(drawRadar); } else rAF=0;
+}
+function startRadar(){ cancelAnimationFrame(rAF); radarPal(); rAF=requestAnimationFrame(drawRadar); }
+window.addEventListener('resize',()=>{ if(view.screen==='dash'&&!rAF) startRadar(); });
+
+/* ======================= actions ======================= */
+function refreshAll(){ renderCounts(); renderStats(); renderDashMissions(); renderLog(); renderMissions(); renderRoster(); renderGear(); if(intel.status==='ok') renderIntel(); }
+const A={
+  go:b=>go(b.dataset.to),
+  close:()=>closeModal(),
+  rc:b=>{ const n=+b.dataset.n; setRC(n); addLog(`Readiness changed to ${n} (${RC[n][0]})`,n<=2?'crit':n===3?'warn':'ok'); toast(`Readiness ${n}: ${RC[n][0]}`,n<=2?'bad':'ok'); },
+  'log-clear':()=>{ S.log=[]; save(); renderLog(); toast('Log cleared','ok'); },
+  'mission-new':()=>missionForm(null),
+  'm-edit':b=>missionForm(b.dataset.id),
+  'm-next':b=>nextStatus(S.missions.find(m=>m.id===b.dataset.id)),
+  'm-abort':b=>{ const m=S.missions.find(x=>x.id===b.dataset.id); confirmBox({title:'Abort mission',text:`Abort <b>${esc(m.code)}</b>? You can reinstate it later.`,label:'Abort mission',icon:'x',onYes:()=>{ m.status='aborted'; save(); addLog(`${m.code} aborted`,'crit'); toast(`${m.code} aborted`,'bad'); refreshAll(); }}); },
+  'm-del':b=>{ const m=S.missions.find(x=>x.id===b.dataset.id); confirmBox({title:'Delete mission',text:`Permanently delete <b>${esc(m.code)}</b>? Its objective and progress will be removed.`,onYes:()=>{ const i=S.missions.indexOf(m); S.missions.splice(i,1); save(); addLog(`Mission ${m.code} deleted`,'crit'); refreshAll(); toast(`${m.code} deleted`,'bad',()=>{ S.missions.splice(i,0,m); save(); addLog(`Mission ${m.code} restored`,'ok'); refreshAll(); }); }}); },
+  mchip:b=>{ view.mStatus=b.dataset.s; renderMissions(); },
+  'm-reset':()=>{ view.mStatus='all'; $('#mSearch').value=''; $('#mPri').value='all'; renderMissions(); },
+  region:b=>{ S.region=b.dataset.r; save(); loadIntel(); },
+  'intel-reload':()=>loadIntel(), 'intel-cache':()=>useCache(), 'intel-more':()=>{ intel.shown+=12; renderIntel(); },
+  'intel-clear':()=>{ $('#iSearch').value=''; renderIntel(); },
+  'intel-restore':()=>{ const n=S.dismissed.length; S.dismissed=[]; save(); renderIntel(); toast(`${n} records restored`,'ok'); },
+  'intel-del':b=>{ const c=intel.data.find(x=>x.id===b.dataset.id); confirmBox({title:'Dismiss intel record',text:`Remove <b>${esc(c.name)}</b> from your intel list? You can restore dismissed records at any time.`,label:'Dismiss',onYes:()=>{ S.dismissed.push(c.id); save(); addLog(`Intel on ${c.name} dismissed`,'warn'); renderIntel(); toast(`${c.name} dismissed`,'bad',()=>{ S.dismissed=S.dismissed.filter(i=>i!==c.id); save(); renderIntel(); }); }}); },
+  'intel-mission':b=>{ const c=intel.data.find(x=>x.id===b.dataset.id); const code=('RECON '+c.name).toUpperCase().slice(0,24);
+    if(S.missions.some(m=>m.code===code)){ toast(`${code} already exists`,'warn'); return; }
+    S.missions.push({id:uid(),created:Date.now(),code,obj:`Gather situation and logistics information on ${c.name}. Capital: ${c.capital}.`,loc:c.name,pri:'medium',status:'planned',prog:0,due:''}); save(); addLog(`Mission ${code} created from intel`,'ok'); refreshAll(); toast(`${code} added to missions`,'ok'); },
+  'person-new':()=>personForm(null), 'p-edit':b=>personForm(b.dataset.id),
+  'p-status':b=>{ const p=S.roster.find(x=>x.id===b.dataset.id), o=['ready','deployed','leave']; p.status=o[(o.indexOf(p.status)+1)%3]; save(); addLog(`${p.name} is now ${p.status}`); renderRoster(); renderStats(); },
+  'p-del':b=>{ const p=S.roster.find(x=>x.id===b.dataset.id); confirmBox({title:'Remove soldier',text:`Remove <b>${esc(p.name)}</b> from the roster?`,label:'Remove',onYes:()=>{ const i=S.roster.indexOf(p); S.roster.splice(i,1); save(); addLog(`${p.name} removed from roster`,'crit'); refreshAll(); toast(`${p.name} removed`,'bad',()=>{ S.roster.splice(i,0,p); save(); refreshAll(); }); }}); },
+  rchip:b=>{ view.rUnit=b.dataset.u; renderRoster(); }, 'r-reset':()=>{ view.rUnit='all'; $('#rSearch').value=''; renderRoster(); },
+  'g-inc':b=>{ const g=S.gear.find(x=>x.id===b.dataset.id); g.qty=Math.min(9999,g.qty+1); save(); renderGear(); renderStats(); renderCounts(); },
+  'g-dec':b=>{ const g=S.gear.find(x=>x.id===b.dataset.id); g.qty=Math.max(0,g.qty-1); save(); if(g.qty===g.min) { toast(`${g.name} at reorder level`,'warn'); } renderGear(); renderStats(); renderCounts(); },
+  'g-del':b=>{ const g=S.gear.find(x=>x.id===b.dataset.id); confirmBox({title:'Delete item',text:`Delete <b>${esc(g.name)}</b> (${g.qty} in stock) from the armory?`,onYes:()=>{ const i=S.gear.indexOf(g); S.gear.splice(i,1); save(); addLog(`Armory: ${g.name} deleted`,'crit'); refreshAll(); toast(`${g.name} deleted`,'bad',()=>{ S.gear.splice(i,0,g); save(); refreshAll(); }); }}); },
+  gchip:b=>{ view.gStatus=b.dataset.s; renderGear(); },
+  'wx-reload':()=>loadWeather(),
+  settings:()=>settings(), signin:()=>signin(),
+  skin:b=>{ setSkin(b.dataset.k); $$('.skin').forEach(x=>x.setAttribute('aria-pressed',x===b)); toast('Skin changed','ok'); },
+  scale:b=>{ const d=+b.dataset.d; S.scale=d===0?1:Math.min(1.4,Math.max(.85,Math.round((S.scale+d)*100)/100)); save(); applyScale(); },
+  calm:b=>{ S.calm=b.checked; save(); applyCalm(); if(!S.calm&&view.screen==='dash') startRadar(); },
+  'reset-all':()=>confirmBox({title:'Reset all data',text:'This restores the sample missions, roster and armory, and removes your changes. This cannot be undone.',label:'Reset everything',icon:'refresh',onYes:()=>{ const keep={skin:S.skin,scale:S.scale,calm:S.calm}; S=Object.assign(seed(),keep); save(); refreshAll(); renderRC(); renderManual(); toast('Data reset to sample','ok'); }}),
+  showpass:()=>{ const i=$('#s-pass'); i.type=i.type==='password'?'text':'password'; },
+  'demo-access':()=>{ $('#s-pass').value='WARDEN6'; $('#s-pass').focus(); },
+  chk:b=>{ S.checks[b.dataset.i]=b.checked; save(); $('#chkCount').textContent=`${Object.values(S.checks).filter(Boolean).length} / ${CHK.length}`; }
+};
+document.addEventListener('click',e=>{
+  const c=e.target.closest('[data-cmd]'); if(c){ go('comms'); runCmd(c.dataset.cmd); return; }
+  const b=e.target.closest('[data-act]'); if(!b||b.tagName==='INPUT') return; const f=A[b.dataset.act]; if(f) f(b,e);
+});
+document.addEventListener('change',e=>{ const b=e.target.closest('input[data-act]'); if(b&&A[b.dataset.act]) A[b.dataset.act](b,e); });
+['#mSearch','#mPri','#mSort'].forEach(s=>$(s).addEventListener('input',renderMissions));
+['#iSearch','#iSort'].forEach(s=>$(s).addEventListener('input',()=>{ if(intel.status==='ok') renderIntel(); }));
+$('#rSearch').addEventListener('input',renderRoster); $('#gSearch').addEventListener('input',renderGear);
+$('#wxSite').innerHTML=SITES.map((s,i)=>`<option value="${i}">${s[0]}</option>`).join(''); $('#wxSite').value=S.wx;
+$('#wxSite').addEventListener('change',e=>{ S.wx=+e.target.value; save(); loadWeather(); });
+window.addEventListener('hashchange',()=>go(location.hash.slice(1),false));
+
+/* ======================= boot ======================= */
+const TICK=['UNCLASSIFIED // TRAINING USE ONLY','WARDEN-6 FIELD COMMAND NET','ALL STATIONS: CHECK READINESS CONDITION','COMMS CHECK EVERY 0600Z AND 1800Z','STAY ALERT. STAY CONNECTED.'];
+$('#ticker').innerHTML=[...TICK,...TICK].map(t=>`<span>${ic('star')}${t}</span>`).join('');
+document.documentElement.dataset.skin=S.skin; applyScale(); applyCalm(); camo(); radarPal();
+if(S.log.length===0){ S.log=[{t:zulu(),text:'Console online. All systems nominal.',type:'ok'},{t:zulu(),text:'Sample data loaded. Edit or delete anything.',type:''}]; }
+renderRC(); renderManual(); refreshAll(); renderIntel(); tickClock(); setInterval(tickClock,1000);
+out('WARDEN-6 SECURE COMMS // LINK ESTABLISHED','ok'); out('Type help for commands, or tap a shortcut above.','dim');
+go(TITLES[location.hash.slice(1)]?location.hash.slice(1):'dash',false);
+})();
+    </script>
+
+</body>
+
+</html>
