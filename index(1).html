@@ -353,6 +353,73 @@
             white-space: nowrap
         }
         
+        .net {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            min-height: 44px;
+            padding: 0 12px;
+            cursor: pointer;
+            background: rgba(0, 0, 0, .3);
+            border: 2px solid var(--nc, var(--ok));
+            color: var(--nc, var(--ok));
+            font: 700 .95rem var(--f-ui);
+            letter-spacing: .12em;
+            text-transform: uppercase
+        }
+        
+        .net[data-s="online"] {
+            --nc: var(--ok)
+        }
+        
+        .net[data-s="offline"] {
+            --nc: var(--crit)
+        }
+        
+        .net[data-s="limited"] {
+            --nc: var(--warn)
+        }
+        
+        .net:hover {
+            background: color-mix(in srgb, var(--nc) 16%, transparent)
+        }
+        
+        .banner {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            flex-wrap: wrap;
+            padding: 12px 14px;
+            border: 2px solid var(--c);
+            color: var(--c);
+            background: rgba(0, 0, 0, .35)
+        }
+        
+        .banner.ok {
+            --c: var(--ok)
+        }
+        
+        .banner.warn {
+            --c: var(--warn)
+        }
+        
+        .banner .txt {
+            flex: 1;
+            min-width: 200px
+        }
+        
+        .banner b {
+            display: block;
+            font: 700 1.15rem var(--f-ui);
+            letter-spacing: .12em;
+            text-transform: uppercase
+        }
+        
+        .banner .txt span {
+            color: var(--fg);
+            font-size: .92rem
+        }
+        
         .chip-op {
             display: flex;
             align-items: center;
@@ -1864,6 +1931,12 @@
             .rc-badge .rc-lab {
                 display: none
             }
+            .net {
+                padding: 0 9px
+            }
+            .net span {
+                display: none
+            }
             .stat b {
                 font-size: 1.8rem
             }
@@ -1922,12 +1995,14 @@
 <symbol id="i-target" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.200"/></symbol>
 <symbol id="i-play" viewBox="0 0 24 24"><path d="M7 4l13 8-13 8z"/></symbol>
 <symbol id="i-undo" viewBox="0 0 24 24"><path d="M9 7L4 12l5 5M4 12h10a6 6 0 010 8"/></symbol>
+<symbol id="i-wifi" viewBox="0 0 24 24"><path d="M2 8.500a15 15 0 0120 0M5.500 12a10 10 0 0113 0M9 15.500a5 5 0 016 0M12 19.500v.5"/></symbol>
 <symbol id="i-wifi-off" viewBox="0 0 24 24"><path d="M2 8.500a15 15 0 0120 0M5.500 12a10 10 0 0113 0M9 15.500a5 5 0 016 0M3 3l18 18M12 19.500v.5"/></symbol>
 <symbol id="i-medkit" viewBox="0 0 24 24"><rect x="3" y="7" width="18" height="13" rx="1"/><path d="M9 7V4h6v3M12 10.500v6M9 13.500h6"/></symbol>
 <symbol id="i-fuel" viewBox="0 0 24 24"><path d="M5 21V4h9v17M5 21h9M14 9h3l2 2v7a1.500 1.500 0 01-3 0v-4h-2M7 8h5"/></symbol>
 <symbol id="i-radio" viewBox="0 0 24 24"><rect x="3" y="9" width="18" height="12" rx="1.500"/><path d="M7 9l10-5M7 14h5M7 17h5"/><circle cx="17" cy="15" r="2"/></symbol>
 <symbol id="i-jeep" viewBox="0 0 24 24"><path d="M2 15v-4l3-1 2-4h8l2 4h4v5z"/><circle cx="7" cy="16.500" r="2.200"/><circle cx="17" cy="16.500" r="2.200"/></symbol>
 <symbol id="i-helmet" viewBox="0 0 24 24"><path d="M3 15a9 9 0 0118 0z"/><path d="M2 15h20M2 18h20"/></symbol>
+<symbol id="i-wifi" viewBox="0 0 24 24"><path d="M2 8.500a15 15 0 0120 0M5.500 12a10 10 0 0113 0M9 15.500a5 5 0 016 0M12 19.500v.5"/></symbol>
 <symbol id="i-down" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></symbol>
 <symbol id="i-tag" viewBox="0 0 24 24"><path d="M3 12V4h8l10 10-8 8z"/><circle cx="7.500" cy="8.500" r="1.200"/></symbol>
 </defs>
@@ -1953,6 +2028,7 @@
             <h1 class="screen-title" id="screenTitle">Command Dashboard</h1>
             <div class="bar-right">
                 <div class="dtg" id="dtg" title="Date-time group, Zulu">--</div>
+                <button class="net" id="net" data-s="online" data-act="net-check" title="Connection status"><svg class="ic"><use href="#i-wifi"/></svg><span id="netTxt">Online</span></button>
                 <button class="rc-badge" data-act="go" data-to="dash" title="Readiness condition. Open dashboard to change it."><span class="pulse"></span><span class="rc-lab">Readiness</span><b id="rcBadge">4</b></button>
                 <button class="chip-op" data-act="signin" title="Operator sign-in"><svg class="ic"><use href="#i-helmet"/></svg><span class="who" id="whoName">CPL DEMO-1</span></button>
                 <button class="ibtn" data-act="settings" aria-label="Settings and display"><svg class="ic"><use href="#i-sliders"/></svg></button>
@@ -2382,6 +2458,7 @@
                     }],
                     log: [],
                     dismissed: [],
+                    intelCache: {},
                     checks: {},
                     region: 'europe',
                     wx: 0
@@ -2393,6 +2470,7 @@
                 } catch (e) {
                     S = seed();
                 }
+                S.intelCache = S.intelCache || {};
                 const save = () => {
                     try {
                         localStorage.setItem(KEY, JSON.stringify(S));
@@ -2645,9 +2723,29 @@ function nextStatus(m){
 }
 
 /* ======================= intel / API ======================= */
+/* ---- connection status ---- */
+const net={s:navigator.onLine?'online':'offline'};
+const NETTXT={online:'Online',offline:'Offline',limited:'Limited'};
+const NETTIP={online:'Online: signal detected and servers reachable.',offline:'Offline: no Wi-Fi or mobile signal.',limited:'Limited: connected to a network, but the data server could not be reached.'};
+function setNet(st){
+  net.s=st; const b=$('#net'); if(!b) return; b.dataset.s=st; $('#netTxt').textContent=NETTXT[st]; b.title=NETTIP[st]+' Click to check.';
+  b.querySelector('use').setAttribute('href',st==='offline'?'#i-wifi-off':'#i-wifi'); b.setAttribute('aria-label','Connection status: '+NETTXT[st]);
+  if(intel.status==='ok') renderIntel();
+}
+function goOnline(){
+  if(net.s==='online') return; setNet('online'); addLog('Signal restored. Back online.','ok'); toast('Back online','ok');
+  if(intel.status==='error'||intel.source==='cache'||intel.status==='idle'){ if(view.screen==='intel') loadIntel(); else { intel.status='idle'; } }
+  if(view.screen==='dash') loadWeather();
+}
+function goOffline(){
+  if(net.s==='offline') return; setNet('offline'); addLog('Signal lost. Working offline.','crit'); toast('No signal. You are offline.','bad');
+  if(view.screen==='intel'&&intel.status!=='ok') useCache(true);
+  if(view.screen==='dash') loadWeather();
+}
+window.addEventListener('online',goOnline); window.addEventListener('offline',goOffline);
+setInterval(()=>{ if(!navigator.onLine&&net.s!=='offline') goOffline(); else if(navigator.onLine&&net.s==='offline') goOnline(); },5000);
 const REGIONS=['europe','asia','americas','africa','oceania'];
-const intel={status:'idle',data:[],source:'live',err:'',shown:12,
-  get region(){return S.region}};
+const intel={status:'idle',data:[],source:'live',via:'',err:'',shown:12};
 const CACHE=[
  ['Germany','Berlin',83240525,357114,'🇩🇪','DEU','Western Europe','europe'],['France','Paris',67391582,551695,'🇫🇷','FRA','Western Europe','europe'],['Norway','Oslo',5379475,323802,'🇳🇴','NOR','Northern Europe','europe'],['Poland','Warsaw',37950802,312679,'🇵🇱','POL','Central Europe','europe'],
  ['Japan','Tokyo',125836021,377930,'🇯🇵','JPN','Eastern Asia','asia'],['Philippines','Manila',109581078,342353,'🇵🇭','PHL','South-Eastern Asia','asia'],['South Korea','Seoul',51780579,100210,'🇰🇷','KOR','Eastern Asia','asia'],['Vietnam','Hanoi',97338583,331212,'🇻🇳','VNM','South-Eastern Asia','asia'],
@@ -2655,46 +2753,65 @@ const CACHE=[
  ['Kenya','Nairobi',53771300,580367,'🇰🇪','KEN','Eastern Africa','africa'],['Egypt','Cairo',102334403,1002450,'🇪🇬','EGY','Northern Africa','africa'],['Ghana','Accra',31072945,238533,'🇬🇭','GHA','Western Africa','africa'],
  ['Australia','Canberra',25687041,7692024,'🇦🇺','AUS','Australia and New Zealand','oceania'],['New Zealand','Wellington',5084300,270467,'🇳🇿','NZL','Australia and New Zealand','oceania'],['Fiji','Suva',896444,18272,'🇫🇯','FJI','Melanesia','oceania']
 ].map(r=>({id:r[5],name:r[0],capital:r[1],pop:r[2],area:r[3],flag:r[4],sub:r[6],region:r[7]}));
+/* offline cache = built-in sample + every record saved from earlier online sessions */
+function cacheFor(region){ const m={}; CACHE.forEach(c=>{m[c.id]=c;}); Object.keys(S.intelCache).forEach(k=>{m[k]=S.intelCache[k];}); return Object.keys(m).map(k=>m[k]).filter(c=>c.region===region); }
+const reconCode=c=>('RECON '+c.name).toUpperCase().slice(0,24);
+async function getJSON(url,ms){ const ctrl=new AbortController(), t=setTimeout(()=>ctrl.abort(),ms); try{ const r=await fetch(url,{signal:ctrl.signal}); if(!r.ok) throw new Error('The server answered with status '+r.status+'.'); return await r.json(); } finally{ clearTimeout(t); } }
+const niceErr=e=>e&&e.name==='AbortError'?'The request timed out.':((e&&(e.name==='TypeError'||/fetch|network/i.test(e.message||'')))?'The intel server could not be reached from this network.':((e&&e.message)||'Unknown error.'));
+const normRC=c=>({id:c.cca3,name:(c.name&&c.name.common)||'Unknown',capital:(c.capital&&c.capital[0])||'None listed',pop:c.population==null?null:c.population,area:c.area||0,flag:c.flag||'🏳',sub:c.subregion||S.region,region:String(c.region||S.region).toLowerCase()});
 async function loadIntel(){
   intel.status='loading'; intel.shown=12; renderIntel();
-  const ctrl=new AbortController(), t=setTimeout(()=>ctrl.abort(),9000);
+  if(!navigator.onLine){ setNet('offline'); intel.status='error'; intel.err='There is no Wi-Fi or mobile signal.'; addLog('Intel feed failed: no signal','crit'); renderIntel(); return; }
+  let data=null, via='', err='';
   try{
-    const r=await fetch(`https://restcountries.com/v3.1/region/${S.region}?fields=name,capital,population,area,flag,cca3,subregion`,{signal:ctrl.signal});
-    if(!r.ok) throw new Error('Server answered with status '+r.status);
-    const j=await r.json(); if(!Array.isArray(j)||!j.length) throw new Error('The feed returned no records');
-    intel.data=j.map(c=>({id:c.cca3,name:(c.name&&c.name.common)||'Unknown',capital:(c.capital&&c.capital[0])||'None listed',pop:c.population||0,area:c.area||0,flag:c.flag||'🏳',sub:c.subregion||S.region,region:S.region}));
-    intel.status='ok'; intel.source='live'; addLog(`Intel feed loaded: ${intel.data.length} ${S.region} records`,'ok');
+    const j=await getJSON(`https://restcountries.com/v3.1/region/${S.region}?fields=name,capital,population,area,flag,cca3,subregion,region`,9000);
+    if(!Array.isArray(j)||!j.length) throw new Error('The feed returned no records.');
+    data=j.map(normRC); via='REST Countries';
   }catch(e){
-    intel.status='error'; intel.err=e.name==='AbortError'?'The request timed out after 9 seconds.':(e.message==='Failed to fetch'?'The device could not reach the intel server.':e.message);
-    addLog('Intel feed failed: '+intel.err,'crit');
-  } finally { clearTimeout(t); }
-  renderIntel();
+    err=niceErr(e);
+    try{ /* backup mirror on a different host */
+      const j2=await getJSON('https://cdn.jsdelivr.net/npm/world-countries@5.0.0/countries.json',15000);
+      data=j2.filter(c=>String(c.region).toLowerCase()===S.region).map(normRC); if(!data.length) throw new Error('The backup feed returned no records.');
+      via='Backup mirror';
+    }catch(e2){ data=null; err=niceErr(e2)==='The intel server could not be reached from this network.'?err:niceErr(e2); }
+  }
+  if(!data){ intel.status='error'; if(!navigator.onLine){ setNet('offline'); intel.err='There is no Wi-Fi or mobile signal.'; } else { setNet('limited'); intel.err='You are connected, but '+(err==='The request timed out.'?'the intel server took too long to answer.':'the intel servers could not be reached. They may be down, or a browser add-on or network filter may be blocking them.'); } addLog('Intel feed failed: '+intel.err,'crit'); renderIntel(); return; }
+  setNet('online');
+  data.forEach(c=>{ const old=S.intelCache[c.id]; S.intelCache[c.id]=Object.assign({},c,{pop:c.pop==null&&old?old.pop:c.pop}); });
+  save(); intel.data=data.map(c=>S.intelCache[c.id]); intel.status='ok'; intel.source='live'; intel.via=via;
+  addLog(`Intel feed available: ${data.length} ${S.region} records via ${via}`,'ok'); renderIntel();
+  toast(`Intel feed available: ${data.length} countries added`,'ok');
 }
-function useCache(){ intel.data=CACHE.filter(c=>c.region===S.region); intel.status='ok'; intel.source='cache'; intel.shown=12; addLog('Intel loaded from offline cache','warn'); renderIntel(); toast('Showing offline cache','warn'); }
+function useCache(auto){ intel.data=cacheFor(S.region); intel.status='ok'; intel.source='cache'; intel.via='Saved on this device'; intel.shown=12; addLog('Intel loaded from offline cache','warn'); renderIntel(); toast(auto?'No signal. Showing saved offline records.':'Showing saved offline records','warn'); }
 function renderIntel(){
   $('#iRegions').innerHTML=REGIONS.map(r=>`<button class="chip" type="button" data-act="region" data-r="${r}" aria-pressed="${S.region===r}">${ic('globe')}${r}</button>`).join('');
-  $('#intelSrc').innerHTML=intel.status==='ok'?`<span class="src ${intel.source}">${ic(intel.source==='live'?'globe':'box')}${intel.source==='live'?'LIVE FEED':'OFFLINE CACHE'}</span>`:'';
+  $('#intelSrc').innerHTML=intel.status==='ok'?(intel.source==='cache'?`<span class="src cache">${ic('wifi-off')}OFFLINE CACHE</span>`:(net.s==='offline'?`<span class="src cache">${ic('wifi-off')}OFFLINE, SAVED COPY</span>`:`<span class="src live">${ic('wifi')}ONLINE, LIVE FEED</span>`)):'';
   const nd=S.dismissed.length; const rb=$('#iRestore'); rb.hidden=!nd; rb.innerHTML=`${ic('undo')}Restore dismissed (${nd})`;
   const body=$('#iBody');
   if(intel.status==='idle'||intel.status==='loading'){
-    body.innerHTML=`<div class="panel"><div class="state" role="status">${'<div class="spinner" aria-hidden="true"></div>'}<h3>Contacting intel server</h3><p>Downloading ${esc(S.region)} records. This can take a few seconds.</p></div><div class="grid g-auto" style="margin-top:14px">${'<div class="skel"></div>'.repeat(6)}</div></div>`; return;
+    body.innerHTML=`<div class="panel"><div class="state" role="status"><div class="spinner" aria-hidden="true"></div><h3>Contacting intel server</h3><p>Downloading ${esc(S.region)} records. This can take a few seconds.</p></div><div class="grid g-auto" style="margin-top:14px">${'<div class="skel"></div>'.repeat(6)}</div></div>`; return;
   }
   if(intel.status==='error'){
-    body.innerHTML=`<div class="state error panel" role="alert">${ic('wifi-off')}<h3>Intel feed unavailable</h3><p>${esc(intel.err)} Check your connection and press Retry, or continue with the saved offline records.</p><div class="btn-row" style="justify-content:center"><button class="btn solid" type="button" data-act="intel-reload">${ic('refresh')}Retry</button><button class="btn" type="button" data-act="intel-cache">${ic('box')}Use offline cache</button></div></div>`; return;
+    const off=net.s==='offline';
+    body.innerHTML=`<div class="state error panel" role="alert">${ic('wifi-off')}<h3>${off?'No signal':'Intel feed unavailable'}</h3><p>${esc(intel.err)} ${off?'Turn Wi-Fi or mobile data back on. The feed will reconnect on its own, or press Retry.':'Check your connection and press Retry.'} You can also continue with the saved offline records.</p><div class="btn-row" style="justify-content:center"><button class="btn solid" type="button" data-act="intel-reload">${ic('refresh')}Retry</button><button class="btn" type="button" data-act="intel-cache">${ic('box')}Use offline cache</button></div></div>`; return;
   }
   const q=$('#iSearch').value.trim().toLowerCase(), sort=$('#iSort').value;
+  const live=intel.source==='live'&&net.s!=='offline', total=intel.data.length;
+  const banner=live
+    ? `<div class="banner ok" role="status">${ic('wifi','lg')}<div class="txt"><b>Intel feed available</b><span>${total} ${esc(S.region)} countries loaded via ${esc(intel.via)} and saved for offline use. Press Recon mission on any country to add it to the mission board.</span></div></div>`
+    : `<div class="banner warn" role="status">${ic('box','lg')}<div class="txt"><b>${intel.source==='live'?'Offline, saved copy':'Offline cache'}</b><span>${total} saved ${esc(S.region)} countries. ${net.s==='offline'?'No signal. Reconnect when you are back online to load the full live list.':'Signal detected. Press Reconnect to load the full live list.'}</span></div><button class="btn sm" type="button" data-act="intel-reload">${ic('refresh')}Reconnect</button></div>`;
   let a=intel.data.filter(c=>!S.dismissed.includes(c.id)&&(!q||(c.name+' '+c.capital+' '+c.sub).toLowerCase().includes(q)));
-  a.sort((x,y)=>sort==='pop'?y.pop-x.pop:sort==='area'?y.area-x.area:x.name.localeCompare(y.name));
-  if(!a.length){ body.innerHTML=`<div class="empty panel">${ic('search')}<h3>No records to show</h3><p>${nd?'You dismissed every matching record, or the search found nothing.':'No record matches your search.'}</p><div class="btn-row">${nd?`<button class="btn solid" type="button" data-act="intel-restore">${ic('undo')}Restore dismissed</button>`:''}<button class="btn ghost" type="button" data-act="intel-clear">${ic('x')}Clear search</button></div></div>`; return; }
-  const shown=a.slice(0,intel.shown), f=n=>n.toLocaleString('en-US');
-  body.innerHTML=`<div class="muted tiny mono" style="margin-bottom:8px">Showing ${shown.length} of ${a.length} records</div>
-  <div class="grid g-auto">${shown.map(c=>`
+  a.sort((x,y)=>sort==='pop'?(y.pop||0)-(x.pop||0):sort==='area'?y.area-x.area:x.name.localeCompare(y.name));
+  if(!a.length){ body.innerHTML=banner+`<div class="empty panel" style="margin-top:16px">${ic('search')}<h3>No records to show</h3><p>${nd?'You dismissed every matching record, or the search found nothing.':'No record matches your search.'}</p><div class="btn-row">${nd?`<button class="btn solid" type="button" data-act="intel-restore">${ic('undo')}Restore dismissed</button>`:''}<button class="btn ghost" type="button" data-act="intel-clear">${ic('x')}Clear search</button></div></div>`; return; }
+  const shown=a.slice(0,intel.shown), f=n=>n==null?'n/a':n.toLocaleString('en-US');
+  body.innerHTML=banner+`<div class="muted tiny mono" style="margin:12px 0 8px">Showing ${shown.length} of ${a.length} records</div>
+  <div class="grid g-auto">${shown.map(c=>{ const set=S.missions.some(m=>m.code===reconCode(c)); return `
    <article class="panel" style="display:grid;gap:12px">
      <div style="display:flex;gap:12px;align-items:center"><span class="flag" aria-hidden="true">${esc(c.flag)}</span><div style="min-width:0"><h3 class="card-title" style="font-size:1.3rem">${esc(c.name)}</h3><div class="muted tiny">${esc(c.sub)}</div></div><span class="badge b-low" style="margin-left:auto">${esc(c.id)}</span></div>
      <dl class="kv" style="margin:0"><dt>Capital</dt><dd>${esc(c.capital)}</dd><dt>Population</dt><dd>${f(c.pop)}</dd><dt>Area</dt><dd>${f(c.area)} km²</dd></dl>
-     <div class="card-actions"><button class="btn sm" type="button" data-act="intel-mission" data-id="${esc(c.id)}">${ic('target')}Recon mission</button>
+     <div class="card-actions">${set?`<button class="btn sm ok" type="button" disabled>${ic('check')}Recon set</button>`:`<button class="btn sm" type="button" data-act="intel-mission" data-id="${esc(c.id)}">${ic('target')}Recon mission</button>`}
        <div class="push"><button class="ibtn sm danger" type="button" data-act="intel-del" data-id="${esc(c.id)}" aria-label="Dismiss ${esc(c.name)}">${ic('trash')}</button></div></div>
-   </article>`).join('')}</div>
+   </article>`; }).join('')}</div>
    ${a.length>shown.length?`<div style="display:grid;place-items:center;margin-top:6px"><button class="btn" type="button" data-act="intel-more">${ic('down')}Load more (${a.length-shown.length} left)</button></div>`:''}`;
 }
 
@@ -2765,16 +2882,17 @@ const WX={0:'Clear sky',1:'Mostly clear',2:'Partly cloudy',3:'Overcast',45:'Fog'
 let wxToken=0;
 async function loadWeather(){
   const site=SITES[S.wx]||SITES[0], tok=++wxToken, b=$('#wxBody');
+  if(!navigator.onLine){ setNet('offline'); b.innerHTML=`<div class="state error" role="alert" style="padding:20px">${ic('wifi-off')}<h3>Weather offline</h3><p>No Wi-Fi or mobile signal. Weather returns automatically when you are back online.</p></div>`; return; }
   b.innerHTML=`<div class="state" style="padding:20px" role="status"><div class="spinner" aria-hidden="true"></div><p>Reading ${esc(site[0])} conditions...</p></div>`;
   const ctrl=new AbortController(), t=setTimeout(()=>ctrl.abort(),8000);
   try{
     const r=await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${site[1]}&longitude=${site[2]}&current=temperature_2m,relative_humidity_2m,wind_speed_10m,weather_code`,{signal:ctrl.signal});
     if(!r.ok) throw new Error('status '+r.status); const j=await r.json(); const c=j.current; if(!c) throw new Error('no data');
-    if(tok!==wxToken) return;
+    if(tok!==wxToken) return; if(net.s!=='online') setNet('online');
     b.innerHTML=`<div style="display:flex;gap:14px;align-items:center;margin-bottom:10px">${ic('cloud','xl')}<div><div class="stat"><b style="font-size:2.4rem">${Math.round(c.temperature_2m)}°C</b></div><div class="muted">${esc(WX[c.weather_code]||'Unknown conditions')}</div></div></div>
     <dl class="kv" style="margin:0"><dt>Humidity</dt><dd>${c.relative_humidity_2m}%</dd><dt>Wind</dt><dd>${c.wind_speed_10m} km/h</dd><dt>Site</dt><dd>${esc(site[0])}</dd></dl>`;
   }catch(e){ if(tok!==wxToken) return;
-    b.innerHTML=`<div class="state error" role="alert" style="padding:20px">${ic('wifi-off')}<h3>Weather offline</h3><p>Could not read conditions for ${esc(site[0])}. Check your connection and retry.</p><button class="btn sm" type="button" data-act="wx-reload">${ic('refresh')}Retry</button></div>`;
+    b.innerHTML=`<div class="state error" role="alert" style="padding:20px">${ic('wifi-off')}<h3>${navigator.onLine?'Weather unavailable':'Weather offline'}</h3><p>${navigator.onLine?'You are connected, but the weather server could not be reached for '+esc(site[0])+'. Retry in a moment.':'No Wi-Fi or mobile signal. Weather returns automatically when you are back online.'}</p><button class="btn sm" type="button" data-act="wx-reload">${ic('refresh')}Retry</button></div>`;
   } finally{ clearTimeout(t); }
 }
 
@@ -2910,7 +3028,7 @@ const A={
   'intel-clear':()=>{ $('#iSearch').value=''; renderIntel(); },
   'intel-restore':()=>{ const n=S.dismissed.length; S.dismissed=[]; save(); renderIntel(); toast(`${n} records restored`,'ok'); },
   'intel-del':b=>{ const c=intel.data.find(x=>x.id===b.dataset.id); confirmBox({title:'Dismiss intel record',text:`Remove <b>${esc(c.name)}</b> from your intel list? You can restore dismissed records at any time.`,label:'Dismiss',onYes:()=>{ S.dismissed.push(c.id); save(); addLog(`Intel on ${c.name} dismissed`,'warn'); renderIntel(); toast(`${c.name} dismissed`,'bad',()=>{ S.dismissed=S.dismissed.filter(i=>i!==c.id); save(); renderIntel(); }); }}); },
-  'intel-mission':b=>{ const c=intel.data.find(x=>x.id===b.dataset.id); const code=('RECON '+c.name).toUpperCase().slice(0,24);
+  'intel-mission':b=>{ const c=intel.data.find(x=>x.id===b.dataset.id); const code=reconCode(c);
     if(S.missions.some(m=>m.code===code)){ toast(`${code} already exists`,'warn'); return; }
     S.missions.push({id:uid(),created:Date.now(),code,obj:`Gather situation and logistics information on ${c.name}. Capital: ${c.capital}.`,loc:c.name,pri:'medium',status:'planned',prog:0,due:''}); save(); addLog(`Mission ${code} created from intel`,'ok'); refreshAll(); toast(`${code} added to missions`,'ok'); },
   'person-new':()=>personForm(null), 'p-edit':b=>personForm(b.dataset.id),
@@ -2922,6 +3040,7 @@ const A={
   'g-del':b=>{ const g=S.gear.find(x=>x.id===b.dataset.id); confirmBox({title:'Delete item',text:`Delete <b>${esc(g.name)}</b> (${g.qty} in stock) from the armory?`,onYes:()=>{ const i=S.gear.indexOf(g); S.gear.splice(i,1); save(); addLog(`Armory: ${g.name} deleted`,'crit'); refreshAll(); toast(`${g.name} deleted`,'bad',()=>{ S.gear.splice(i,0,g); save(); refreshAll(); }); }}); },
   gchip:b=>{ view.gStatus=b.dataset.s; renderGear(); },
   'wx-reload':()=>loadWeather(),
+  'net-check':()=>{ if(navigator.onLine){ if(net.s==='offline') goOnline(); else toast(net.s==='online'?'Online: signal detected':'Limited: connected, but the data server is unreachable',net.s==='online'?'ok':'warn'); if(view.screen==='intel'&&intel.status!=='ok'||intel.source==='cache') loadIntel(); } else { goOffline(); } },
   settings:()=>settings(), signin:()=>signin(),
   skin:b=>{ setSkin(b.dataset.k); $$('.skin').forEach(x=>x.setAttribute('aria-pressed',x===b)); toast('Skin changed','ok'); },
   scale:b=>{ const d=+b.dataset.d; S.scale=d===0?1:Math.min(1.4,Math.max(.85,Math.round((S.scale+d)*100)/100)); save(); applyScale(); },
@@ -2948,7 +3067,7 @@ const TICK=['UNCLASSIFIED // TRAINING USE ONLY','WARDEN-6 FIELD COMMAND NET','AL
 $('#ticker').innerHTML=[...TICK,...TICK].map(t=>`<span>${ic('star')}${t}</span>`).join('');
 document.documentElement.dataset.skin=S.skin; applyScale(); applyCalm(); camo(); radarPal();
 if(S.log.length===0){ S.log=[{t:zulu(),text:'Console online. All systems nominal.',type:'ok'},{t:zulu(),text:'Sample data loaded. Edit or delete anything.',type:''}]; }
-renderRC(); renderManual(); refreshAll(); renderIntel(); tickClock(); setInterval(tickClock,1000);
+renderRC(); renderManual(); refreshAll(); renderIntel(); setNet(net.s); tickClock(); setInterval(tickClock,1000);
 out('WARDEN-6 SECURE COMMS // LINK ESTABLISHED','ok'); out('Type help for commands, or tap a shortcut above.','dim');
 go(TITLES[location.hash.slice(1)]?location.hash.slice(1):'dash',false);
 })();
